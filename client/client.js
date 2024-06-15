@@ -9,7 +9,14 @@ var app,
         <div>
             <div class="background-image" :style="getImageUrl(rec.coverImage.extraLarge)">
             </div>
-            <h5>{{rec.title.english}}</h5>
+            <h5>{{rec.title.english}}<b>{{rec.seasonYear}}</b></h5>
+            <div v-html="rec.description"></div>
+            <p>{{rec.episodes}} Episodes</p>
+            <div v-for="link in rec.externalLinks">
+                <a :href="(link.url)">
+                    <img :src="(link.icon)" v-bind:style="{backgroundColor: link.color}"> </img>
+                </a>
+            </div>
             <a :href="(rec.siteUrl)" target="_blank">Go To Page</a> 
         </div>
     `
