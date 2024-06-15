@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="/client/client.js"></script>
+        <link rel="stylesheet" href="main.css">
+    </head>
+    <body>
+        <div id="mainApp">
+            <form id="searchForm" action="/userSearch" method="get">
+                <input id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
+                <input type="submit" value="Search for Recs">
+            </form>
+            <div id="result">
+                <anime-rec
+                    v-for= "rec in recs"
+                    v-bind:rec="rec"
+                    v-bind:key="rec.id"
+                >
+                </anime-rec>
+            </div>
+        </div>
+    </body>
+</html>

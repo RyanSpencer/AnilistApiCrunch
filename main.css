@@ -1,0 +1,12 @@
+.background-image {
+    padding: 20px;
+    background-color: darkgrey;
+    height: 15rem;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 9.8rem;
+}
+#result {
+    display: none
+}
