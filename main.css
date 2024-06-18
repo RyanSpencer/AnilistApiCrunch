@@ -1,9 +1,8 @@
 .background-image {
-    height: 15rem;
+    height: 35rem;
     background-position: center;
-    background-size: contain;
+    background-size: cover;
     background-repeat: no-repeat;
-    width: 9.8rem;
 }
 #result {
     display: none;
