@@ -11,15 +11,17 @@ var app,
                 <div class="background-image" :style="getImageUrl(rec.coverImage.extraLarge)">
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{rec.title.english}} <b>{{rec.seasonYear}}</b></h5>
+                    <h5 class="card-title">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h5>
                     <div class="card-body" v-html="rec.description"></div>
                     <p>{{rec.episodes}} Episodes</p>
                 </div>
                 <div class="card-footer">
-                    <div class="card-iconlink" v-for="link in rec.externalLinks">
-                        <a :href="(link.url)">
-                            <img class="site-icon" :src="(link.icon)" v-bind:style="{backgroundColor: link.color}"> </img>
-                        </a>
+                    <div class="overflow-x-auto site-link-container">
+                        <div class="card-iconlink" v-for="link in rec.externalLinks">
+                            <a :href="(link.url)">
+                                <img class="site-icon" :src="(link.icon)" v-bind:style="{backgroundColor: link.color}"> </img>
+                            </a>
+                        </div>
                     </div>
                     <a class="card-hotlink" :href="(rec.siteUrl)" target="_blank">
                         <img class="site-icon" src="https://anilist.co/img/icons/icon.svg"></img>
