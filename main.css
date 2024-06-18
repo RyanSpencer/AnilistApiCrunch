@@ -31,8 +31,13 @@
 .site-icon {
     width: 64px;
     height: 64px;
+    padding: 4px;
+    border-radius: 10px;
 }
 .site-link-container {
-    width: 75%;
+    width: 80%;
     display: inline-flex;
+}
+.last-link {
+    margin-right: 0px !important;
 }

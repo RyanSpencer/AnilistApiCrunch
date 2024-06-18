@@ -17,7 +17,7 @@ var app,
                 </div>
                 <div class="card-footer">
                     <div class="overflow-x-auto site-link-container">
-                        <div class="card-iconlink" v-for="link in rec.externalLinks">
+                        <div v-for="(link,index) in rec.externalLinks" v-bind:class="{'last-link': index === rec.externalLinks.length -1, 'card-iconlink': true }">
                             <a :href="(link.url)">
                                 <img class="site-icon" :src="(link.icon)" v-bind:style="{backgroundColor: link.color}"> </img>
                             </a>
@@ -66,8 +66,8 @@ $(document).ready(function(){
             error: function(error, status, xhr) {
                 var resultText = JSON.stringify(error);
                 $("#result").text(resultText);
-                submitButton.prop("disabled", false);
-                usernameSearch.prop("disabled", false);
+                submitButton.prop("disabled", null);
+                usernameSearch.prop("disabled", null);
             }
         });
 
