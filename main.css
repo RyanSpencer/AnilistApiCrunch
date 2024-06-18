@@ -1,6 +1,4 @@
 .background-image {
-    padding: 20px;
-    background-color: darkgrey;
     height: 15rem;
     background-position: center;
     background-size: contain;
@@ -8,5 +6,29 @@
     width: 9.8rem;
 }
 #result {
-    display: none
+    display: none;
+    max-width: 80vw;
+    margin: auto;
+}
+#apiCall {
+    display: none;
+}
+.card-iconlink {
+    display:inline-block;
+    margin-right: 7px;
+}
+.card-hotlink {
+    float: right;
+}
+
+.card-hotlink .site-icon {
+    background: #2b2d42;
+}
+
+#searchForm {
+    margin: 10px;
+}
+.site-icon {
+    width: 64px;
+    height: 64px;
 }

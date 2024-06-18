@@ -211,7 +211,7 @@ function userSearch(req, res, params) {
                 //Take the data we get back an add on the rating info
                 data.data.Page.media.forEach((show) => {
                     show.rating = results.find((result) => result.id === show.id).rating;
-                    show.externalLinks.filter((link) => link.type === "STREAMING");
+                    show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
                     finalObject.push(show);
                 })
                 //Sort out the Object by rating
