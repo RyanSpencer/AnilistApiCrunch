@@ -11,8 +11,8 @@ var app,
                 <div class="background-image" :style="getImageUrl(rec.coverImage.extraLarge)">
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h5>
-                    <div class="card-body" v-html="rec.description"></div>
+                    <h4 class="card-title">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
+                    <div class="card-text" v-html="rec.description"></div>
                     <p>{{rec.episodes}} Episodes</p>
                 </div>
                 <div class="card-footer">
@@ -47,21 +47,35 @@ $(document).ready(function(){
         var submitButton = $("#submitButton");
         var usernameSearch = $("#usernameSearch");
         var action = $("#searchForm").attr("action");
-        var term = usernameSearch.val();
+        var formData = $("#searchForm").serializeArray();
         submitButton.prop("disabled", true);
         usernameSearch.prop("disabled", true);
         document.querySelector("#apiCall").style.display = "block";
 
+        var dataObj = {};
+        formData.forEach((data) => {
+            dataObj = {[data.name] : data.value }
+        })
+        
         $.ajax({
             cache: false,
             type: 'get',
             url: action,
-            data: "term=" + term,
+            data: formData,
             dataType: "JSON",
             success: function(result, status, xhr) {
                 app.recs = result;
                 document.querySelector("#result").style.display = "flex";
                 document.querySelector("#apiCall").style.display = "none";
+                submitButton.prop("disabled", null);
+                usernameSearch.prop("disabled", null);
+                $(document).ready(function(e) {
+                    Array.from(document.getElementsByClassName("site-link-container")).forEach((siteCon) => {
+                        if (siteCon.scrollWidth <= siteCon.clientWidth) {
+                            siteCon.classList.add("non-scroll-container");
+                        }
+                    })
+                })
             },
             error: function(error, status, xhr) {
                 var resultText = JSON.stringify(error);

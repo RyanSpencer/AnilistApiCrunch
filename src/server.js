@@ -6,6 +6,15 @@ const port = 3000;
 var index = fs.readFileSync(__dirname + "/../index.html");
 var scriptFile = fs.readFileSync(__dirname + "/../client/client.js");
 var cssFile = fs.readFileSync(__dirname + "/../main.css");
+var mediaStatus = {
+    cur: "CURRENT",
+    pla: "PLANNING",
+    com: "COMPLETED",
+    drop: "DROPPED",
+    pause: "PAUSED",
+    repeat: "REPEATING"
+}
+
 
 function onRequest(req, res) {
     var pathObj = url.parse(req.url, true);
@@ -18,7 +27,7 @@ function onRequest(req, res) {
     }
 
     if(pathObj.pathname === "/userSearch") {
-        res = userSearch(req, res, params.term);
+        res = userSearch(req, res, params);
     }
     if (pathObj.pathname === "/client/client.js") {
         res.writeHead(200, {"Content-Type": "text/javascript"});
@@ -60,7 +69,7 @@ function userSearch(req, res, params) {
     `
 
     var variables = {
-        id: params
+        id: params.term
     };
 
     var url = `https://graphql.anilist.co`,
@@ -97,7 +106,25 @@ function userSearch(req, res, params) {
     }
     
     function handleData(data) {
-        var entries = data.data.MediaListCollection.lists.filter((list) => list.status === "COMPLETED")[0].entries
+        //get the lists of the users anime which are split into categories
+        var userLists = data.data.MediaListCollection.lists;
+        //Start with statuses we want to include, we always want to include completed and rewatching
+        var statusToAllow = [mediaStatus.com, mediaStatus.repeat];
+        //based on certain params, add more lists
+        if(params.watching) statusToAllow.push(mediaStatus.cur);
+        if(params.dropped) statusToAllow.push(mediaStatus.drop);
+        if(params.paused) statusToAllow.push(mediaStatus.pause);
+        var entries = [];
+        //for each status to allow, filter down to the exact list, then get its entries and concat it onto entries
+        statusToAllow.forEach((listStatus) => {
+            var entriesToAdd = userLists.filter((list) => {
+                return list.status === listStatus;
+            })
+            if(entriesToAdd.length > 0) {
+
+                entries.push(...entriesToAdd[0].entries)
+            }
+        })
         /**
          * {
          *    id: ###
@@ -108,6 +135,10 @@ function userSearch(req, res, params) {
         //Iterate through the enteries
         for(var i = 0; i < entries.length; i++) {
             var score = entries[i].score;
+            //if the score is zero assume it isn't rated
+            if (score === 0) {
+                continue;
+            }
             var totalUpvotes = 0;
             //Grab the array of recommendations
             var recommendations = entries[i].media.recommendations.edges;

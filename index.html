@@ -15,6 +15,9 @@
             <form id="searchForm" action="/userSearch" method="get">
                 <input id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
                 <input id="submitButton" type="submit" value="Search for Recs">
+                <input id="includeWatching" type="checkbox" name="watching">
+                <input id="includeDropped" type="checkbox" name="dropped">
+                <input id="includePaused" type="checkbox" name="paused">
             </form>
             <div id="result" class="row row-cols-5 gy-3">
                 <anime-rec

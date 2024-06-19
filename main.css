@@ -35,8 +35,18 @@
 }
 .site-link-container {
     width: 80%;
+    scrollbar-width: thin;
+    padding-bottom: 5px;
     display: inline-flex;
+    scrollbar-gutter: stable;
+}
+.non-scroll-container {
+    padding-bottom: 13px;
 }
 .last-link {
     margin-right: 0px !important;
+}
+.card-body {
+    overflow-y: auto;
+    height: 25em;
 }
