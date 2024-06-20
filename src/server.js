@@ -63,6 +63,10 @@ function userSearch(req, res, params) {
                       score
                       media {
                         id
+                        title {
+                            english
+                            romaji
+                        }
                         recommendations {
                           edges {
                             node {
@@ -165,14 +169,14 @@ function userSearch(req, res, params) {
                 //Add up all the recs to get some math
                 totalUpvotes += recommendations[j].node.rating;
             }   
-            //If the total number of upvotes is less than or equal to the number of recs that we should probably just ignore them
-            if (totalUpvotes <= recommendations.length) {
+            //If the total number of upvotes is less than or equal to the number of recs that we should probably just ignore them. Same if there are less than 10 total upvotes, it breaks the math
+            if (totalUpvotes <= recommendations.length || totalUpvotes < 10) {
                 continue;
             }
             //Now iterate through the recs for real
             for (var j = 0; j < recommendations.length; j++) {
-                //If it has a sub zero rating it sucks, also sometimes it just has a recommendation of null? ignore them
-                if (recommendations[j].node.rating <= 0 || recommendations[j].node.mediaRecommendation === null) {
+                //ignore this if the rating is les than zero, or if the recommendation is null
+                if (recommendations[j].node.rating <= 0 ||  recommendations[j].node.mediaRecommendation === null) {
                     continue;
                 }
                 var existingRec = null;
@@ -181,13 +185,15 @@ function userSearch(req, res, params) {
                     existingRec = recs.find((e) => e.id === recommendations[j].node.mediaRecommendation.id);
                     if (existingRec != null) {
                         existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf);
+                        existingRec.sources.push({englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score})
                     }
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 if (existingRec == null || recs.length === 0) {
                     recs.push({
                         id: recommendations[j].node.mediaRecommendation.id,
-                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf)
+                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf),
+                        sources: [{englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score}]
                     })
                 }
             }
@@ -225,6 +231,7 @@ function userSearch(req, res, params) {
                   romaji
                   english
                 }
+                format
                 coverImage {
                     extraLarge
                 }
@@ -255,7 +262,9 @@ function userSearch(req, res, params) {
                 var finalObject = [];
                 //Take the data we get back an add on the rating info
                 data.data.Page.media.forEach((show) => {
-                    show.rating = results.find((result) => result.id === show.id).rating;
+                    recData = results.find((result) => result.id === show.id);
+                    show.rating = recData.rating;
+                    show.sources = recData.sources;
                     show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
                     finalObject.push(show);
                 })

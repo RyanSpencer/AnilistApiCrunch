@@ -46,3 +46,11 @@
     height: 25em;
     scrollbar-width: thin;
 }
+.btn-rec-data {
+    position: absolute;
+    right: 0;
+    padding: 5px;
+    display: flex;
+    background: rgba(0,0,0,0);
+    border: none;
+}
