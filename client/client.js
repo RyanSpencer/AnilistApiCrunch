@@ -61,8 +61,6 @@ $(document).ready(function(){
         app.sources = rec.sources;
     })
 
-    console.log(app.recs);
-
     $("#searchForm").submit(function(e) {
         var action = $("#searchForm").attr("action");
         var formData = $("#searchForm").serializeArray();

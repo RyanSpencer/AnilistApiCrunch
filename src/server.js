@@ -106,9 +106,11 @@ function userSearch(req, res, params) {
     return res;
 
     function handleError(error) {
+        console.log(error);
         res.writeHead(500, {'Content-Type': 'application/json'});
         var responseMessage = {
-            message: "Failed to connect to anilist. Check Username info and try again"
+            message: "Failed to connect to anilist. Check Username info and try again",
+            error: error
         };
 
         res.write(JSON.stringify(responseMessage));
@@ -121,7 +123,7 @@ function userSearch(req, res, params) {
         });
     }
     
-    function handleData(data) {
+    async function handleData(data) {
         //get the lists of the users anime which are split into categories
         var userLists = data.data.MediaListCollection.lists;
         //For calculation sake we need to find what type of score this user has
@@ -218,12 +220,10 @@ function userSearch(req, res, params) {
             ids.push(result.id);
         });
         queryString = `
-        query($anime: [Int], $length: Int) {
-            Page(page: 1, perPage: $length) {
+        query($anime: [Int], $length: Int, $page: Int) {
+            Page(page: $page, perPage: $length) {
               pageInfo {
-                total
-                currentPage
-                lastPage
+                hasNextPage
               }
               media(id_in: $anime) {
                 id
@@ -251,25 +251,31 @@ function userSearch(req, res, params) {
         `
         variables = {
             length : results.length,
-            anime: ids
+            anime: ids,
+            page: 1
         }
         options.body = JSON.stringify({
             query: queryString,
             variables: variables
         })
-        fetch(url, options).then(handleResponse)
-            .then(function(data) {
-                var finalObject = [];
-                //Take the data we get back an add on the rating info
-                data.data.Page.media.forEach((show) => {
-                    recData = results.find((result) => result.id === show.id);
-                    show.rating = recData.rating;
-                    show.sources = recData.sources;
-                    show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
-                    finalObject.push(show);
-                })
-                //Sort out the Object by rating
-                finalObject.sort((a, b) => 
+        var data = null, 
+        finalObject = [];
+        do {
+            data = await (fetch(url,options).then(handleResponse)).catch(handleError);
+            data.data.Page.media.forEach((show) => {
+                recData = results.find((result) => result.id === show.id);
+                show.rating = recData.rating;
+                show.sources = recData.sources;
+                show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
+                finalObject.push(show);
+            })
+            variables.page += 1;
+            options.body = JSON.stringify({
+                query: queryString,
+                variables: variables
+            })
+        } while(data.data.Page.pageInfo.hasNextPage)
+        finalObject.sort((a, b) => 
                 {
                     if (a.rating > b.rating) {
                         return -1
@@ -281,11 +287,9 @@ function userSearch(req, res, params) {
                         return 0;
                     }
                 })
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                res.write(JSON.stringify(finalObject));
-                res.end();
-            })
-            .catch(handleError)
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.write(JSON.stringify(finalObject));
+        res.end();
     }
 }
 
