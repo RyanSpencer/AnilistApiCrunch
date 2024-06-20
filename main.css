@@ -5,12 +5,8 @@
     background-repeat: no-repeat;
 }
 #result {
-    display: none;
     max-width: 80vw;
     margin: auto;
-}
-#apiCall {
-    display: none;
 }
 .card-iconlink {
     display:inline-block;
@@ -38,7 +34,6 @@
     scrollbar-width: thin;
     padding-bottom: 5px;
     display: inline-flex;
-    scrollbar-gutter: stable;
 }
 .non-scroll-container {
     padding-bottom: 13px;
@@ -49,4 +44,5 @@
 .card-body {
     overflow-y: auto;
     height: 25em;
+    scrollbar-width: thin;
 }

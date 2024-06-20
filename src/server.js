@@ -6,14 +6,21 @@ const port = 3000;
 var index = fs.readFileSync(__dirname + "/../index.html");
 var scriptFile = fs.readFileSync(__dirname + "/../client/client.js");
 var cssFile = fs.readFileSync(__dirname + "/../main.css");
-var mediaStatus = {
+const mediaStatus = {
     cur: "CURRENT",
     pla: "PLANNING",
     com: "COMPLETED",
     drop: "DROPPED",
     pause: "PAUSED",
     repeat: "REPEATING"
-}
+};
+const scoreFormat = [
+    {name: "POINT_100", half: 50},
+    {name: "POINT_10_DECIMAL", half: 5},
+    {name: "POINT_10", half: 5},
+    {name: "POINT_5", half: 3 },
+    {name: "POINT_3", half: 2 }
+]
 
 
 function onRequest(req, res) {
@@ -45,6 +52,11 @@ function userSearch(req, res, params) {
     var queryString = `
         query($id: String) {
             MediaListCollection(userName: $id, type: ANIME) {
+                user {
+                    mediaListOptions {
+                      scoreFormat
+                    }
+                }
                 lists {
                     status
                     entries {
@@ -108,6 +120,8 @@ function userSearch(req, res, params) {
     function handleData(data) {
         //get the lists of the users anime which are split into categories
         var userLists = data.data.MediaListCollection.lists;
+        //For calculation sake we need to find what type of score this user has
+        var formatHalf = scoreFormat.find((format) => format.name === data.data.MediaListCollection.user.mediaListOptions.scoreFormat).half;
         //Start with statuses we want to include, we always want to include completed and rewatching
         var statusToAllow = [mediaStatus.com, mediaStatus.repeat];
         //based on certain params, add more lists
@@ -117,12 +131,12 @@ function userSearch(req, res, params) {
         var entries = [];
         //for each status to allow, filter down to the exact list, then get its entries and concat it onto entries
         statusToAllow.forEach((listStatus) => {
-            var entriesToAdd = userLists.filter((list) => {
+            var entriesToAdd = userLists.find((list) => {
                 return list.status === listStatus;
             })
-            if(entriesToAdd.length > 0) {
+            if(entriesToAdd != null) {
 
-                entries.push(...entriesToAdd[0].entries)
+                entries.push(...entriesToAdd.entries)
             }
         })
         /**
@@ -135,8 +149,8 @@ function userSearch(req, res, params) {
         //Iterate through the enteries
         for(var i = 0; i < entries.length; i++) {
             var score = entries[i].score;
-            //if the score is zero assume it isn't rated
-            if (score === 0) {
+            //if the score is zero assume it isn't rated, also if its a half score we ignore it
+            if (score === 0 || score === formatHalf) {
                 continue;
             }
             var totalUpvotes = 0;
@@ -166,14 +180,14 @@ function userSearch(req, res, params) {
                 if(recs.length > 0) {
                     existingRec = recs.find((e) => e.id === recommendations[j].node.mediaRecommendation.id);
                     if (existingRec != null) {
-                        existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes);
+                        existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf);
                     }
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 if (existingRec == null || recs.length === 0) {
                     recs.push({
                         id: recommendations[j].node.mediaRecommendation.id,
-                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes)
+                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf)
                     })
                 }
             }
@@ -266,10 +280,10 @@ function userSearch(req, res, params) {
     }
 }
 
-//Calculate rating by getting how many upvotes out of total given to the reccs it has, then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive
-function calculateRating(score, upvotes, totalUpvotes) {
+//Calculate rating by getting how many upvotes out of total given to the reccs it has, then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive (score 10 example, we pass in format half so it works for all)
+function calculateRating(score, upvotes, totalUpvotes, formatHalf) {
     var percentage = upvotes / totalUpvotes;
-    var relativeScore = score - 5;
+    var relativeScore = score - formatHalf;
     return relativeScore * percentage;
 }
 

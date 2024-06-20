@@ -14,22 +14,34 @@
         <div id="mainApp">
             <form id="searchForm" action="/userSearch" method="get">
                 <input id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
-                <input id="submitButton" type="submit" value="Search for Recs">
-                <input id="includeWatching" type="checkbox" name="watching">
-                <input id="includeDropped" type="checkbox" name="dropped">
-                <input id="includePaused" type="checkbox" name="paused">
+                <input id="submitButton" type="submit" value="Search for Recs" :disabled="loading">
+                <label for="includeWatching" class="form-check-label">Include Currently Watching: </label>
+                <input id="includeWatching" class="form-check-input" type="checkbox" name="watching">
+                <label for="includeDropped" class="form-check-label">Include Dropped: </label>
+                <input id="includeDropped" class="form-check-input" type="checkbox" name="dropped">
+                <label for="includePaused" class="form-check-label">Include Paused: </label>
+                <input id="includePaused" class="form-check-input" type="checkbox" name="paused">
             </form>
-            <div id="result" class="row row-cols-5 gy-3">
-                <anime-rec
-                    v-for= "rec in recs"
-                    v-bind:rec="rec"
-                    v-bind:key="rec.id"
-                >
-                </anime-rec>
-            </div>
-            <div id="apiCall" class="spinner-border" role="status">
+            <div id="apiCall"  v-if="loading" class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
+            <div id = "dataArea" v-if="!loading && recs.length > 0">
+                <div id="viewPreferences">
+                    <input class="form-check-input" v-model="titleLanguage" value="romaji" type="radio" id="romanjiName" name="nameRadio">
+                    <label class="form-check-label" for="romajiName">Use Romaji: </label>
+                    <input class= "form-check-input" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" checked>
+                    <label class="form-check-label" for="englishName">Use English: </label>
+                </div>
+                <div id="result" class="row row-cols-5 gy-3">
+                    <anime-rec
+                        v-for= "rec in recs"
+                        v-bind:rec="rec"
+                        v-bind:key="rec.id"
+                        v-bind:title-language="titleLanguage"
+                    >
+                    </anime-rec>
+                </div>
+            </div>
         </div>
     </body>
 </html>

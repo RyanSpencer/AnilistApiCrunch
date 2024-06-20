@@ -1,6 +1,6 @@
 var app,
     recs,
-    animeCards = { props: ['rec'], methods: {
+    animeCards = { props: ['rec', 'titleLanguage'], methods: {
         getImageUrl: function(image) {
             return 'background-image: url("' + image + '")';
         }
@@ -11,7 +11,8 @@ var app,
                 <div class="background-image" :style="getImageUrl(rec.coverImage.extraLarge)">
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
+                    <h4 class="card-title" v-if="(titleLanguage === 'english' && rec.title.english != null ) || rec.title.romaji == null">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
+                    <h4 class="card-title" v-if="(titleLanguage === 'romaji' && rec.title.romaji != null ) || rec.title.english == null">{{rec.title.romaji}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
                     <div class="card-text" v-html="rec.description"></div>
                     <p>{{rec.episodes}} Episodes</p>
                 </div>
@@ -39,36 +40,31 @@ $(document).ready(function(){
             'anime-rec': animeCards
         },
         data: {
-            recs: ''
+            recs: '',
+            titleLanguage: "english",
+            loading: false
         }
     });
 
     $("#searchForm").submit(function(e) {
-        var submitButton = $("#submitButton");
-        var usernameSearch = $("#usernameSearch");
         var action = $("#searchForm").attr("action");
         var formData = $("#searchForm").serializeArray();
-        submitButton.prop("disabled", true);
-        usernameSearch.prop("disabled", true);
-        document.querySelector("#apiCall").style.display = "block";
 
         var dataObj = {};
         formData.forEach((data) => {
-            dataObj = {[data.name] : data.value }
+            dataObj[data.name] = data.value
         })
         
+        app.loading = true;
         $.ajax({
             cache: false,
             type: 'get',
             url: action,
-            data: formData,
+            data: dataObj,
             dataType: "JSON",
             success: function(result, status, xhr) {
                 app.recs = result;
-                document.querySelector("#result").style.display = "flex";
-                document.querySelector("#apiCall").style.display = "none";
-                submitButton.prop("disabled", null);
-                usernameSearch.prop("disabled", null);
+                app.loading = false
                 $(document).ready(function(e) {
                     Array.from(document.getElementsByClassName("site-link-container")).forEach((siteCon) => {
                         if (siteCon.scrollWidth <= siteCon.clientWidth) {
@@ -78,10 +74,9 @@ $(document).ready(function(){
                 })
             },
             error: function(error, status, xhr) {
+                app.loading = false;
                 var resultText = JSON.stringify(error);
                 $("#result").text(resultText);
-                submitButton.prop("disabled", null);
-                usernameSearch.prop("disabled", null);
             }
         });
 
