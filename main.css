@@ -22,6 +22,7 @@
 
 #searchForm {
     margin: 10px;
+    text-align: center;
 }
 .site-icon {
     width: 64px;
@@ -53,4 +54,11 @@
     display: flex;
     background: rgba(0,0,0,0);
     border: none;
+}
+#view-preferences {
+    padding: 15px;
+    text-align: right;
+}
+#apiCall {
+    margin: auto;
 }

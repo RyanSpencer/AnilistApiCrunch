@@ -45,7 +45,7 @@ $(document).ready(function(){
             'anime-rec': animeCards
         },
         data: {
-            recs: '',
+            recs: [],
             titleLanguage: "english",
             loading: false,
             sources: []
@@ -60,6 +60,8 @@ $(document).ready(function(){
             });
         app.sources = rec.sources;
     })
+
+    console.log(app.recs);
 
     $("#searchForm").submit(function(e) {
         var action = $("#searchForm").attr("action");
