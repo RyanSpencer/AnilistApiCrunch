@@ -182,25 +182,32 @@ function userSearch(req, res, params) {
                 if (recommendations[j].node.rating <= 0 ||  recommendations[j].node.mediaRecommendation === null) {
                     continue;
                 }
-                var existingRec = null;
-                //If the rec array already has stuff and it already exists we should add to it
-                if(recs.length > 0) {
-                    existingRec = recs.find((e) => e.id === recommendations[j].node.mediaRecommendation.id);
-                    if (existingRec != null) {
-                        existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf);
-                        existingRec.sources.push({englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score})
-                    }
+                var existingRec = recs.find((e) => e.id === recommendations[j].node.mediaRecommendation.id);
+                if (existingRec != null) {
+                    var sequelDeweight = 1;
+                    existingRec.sources.map((source) => {
+                        //If we find this show has the title of another show in it, its a direct sequel and we want to deweight it
+                        if (entries[i].media.title.romaji.indexOf(source.romajiName) >= 0) {
+                            source.sequels += 2;
+                            //we deweight starting at 1 seuqel going up
+                            sequelDeweight = source.sequels + 1;
+                        }
+                        return source;
+                    })
+                    existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight);
+                    existingRec.sources.push({englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0})
                 }
                 //If there is no recs or it hasn't been added yet, add it
-                if (existingRec == null || recs.length === 0) {
+                else {
                     recs.push({
                         id: recommendations[j].node.mediaRecommendation.id,
-                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf),
-                        sources: [{englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score}]
+                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight),
+                        sources: [{englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0}]
                     })
                 }
             }
          }
+         console.log(recs);
          //Take the results of the recs and remove any below 0 recs, then remove an entries which already are on completed, then sort by rating, then cut to just the top 200
         var results = recs.filter((rec) => rec.rating > 0)
         .filter((rec) => entries.find((entry) => entry.media.id === rec.id) == null)
@@ -261,6 +268,7 @@ function userSearch(req, res, params) {
         })
         var data = null, 
         finalObject = [];
+        //Loop while we still have pages of data to retrieve
         do {
             data = await (fetch(url,options).then(handleResponse)).catch(handleError);
             data.data.Page.media.forEach((show) => {
@@ -273,12 +281,14 @@ function userSearch(req, res, params) {
                 show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
                 finalObject.push(show);
             })
+            //reset variables so we can query the next page
             variables.page += 1;
             options.body = JSON.stringify({
                 query: queryString,
                 variables: variables
             })
         } while(data.data.Page.pageInfo.hasNextPage)
+        //Sort the data since it comes back in random order
         finalObject.sort((a, b) => 
                 {
                     if (a.rating > b.rating) {
@@ -299,12 +309,13 @@ function userSearch(req, res, params) {
 
 /*Calculate rating by getting how many upvotes out of total given to the reccs it has, 
 then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive (score 10 example, we pass in format half so it works for all)
-Then multiply by certanty, which reads how many digits of total upvotes we have. 2 digits is the base, 3 digits is a two times multipler, and 4 digits is a three times*/
-function calculateRating(score, upvotes, totalUpvotes, formatHalf) {
+Then multiply by certanty, which reads how many digits of total upvotes we have. 2 digits is the base, 3 digits is a two times multipler, and 4 digits is a three times
+divide by the number of sequels, the more the lower the impact the number is. If there are no sequels it is 1*/
+function calculateRating(score, upvotes, totalUpvotes, formatHalf, sequelDeweight) {
     var percentage = upvotes / totalUpvotes;
     var relativeScore = score - formatHalf;
     var certantityAdjustment = totalUpvotes.toString().length - 1;
-    return relativeScore * percentage * certantityAdjustment;
+    return (relativeScore * percentage * certantityAdjustment) /sequelDeweight;
 }
 
 http.createServer(onRequest).listen(port);
