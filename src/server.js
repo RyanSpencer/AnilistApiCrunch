@@ -265,7 +265,10 @@ function userSearch(req, res, params) {
             data = await (fetch(url,options).then(handleResponse)).catch(handleError);
             data.data.Page.media.forEach((show) => {
                 recData = results.find((result) => result.id === show.id);
-                show.rating = recData.rating;
+                //avoids over recomending shows with only 1 or 2 sources. if there are at least 3 sources multiplies by 1, otherwise multiply by 1/2 or 1/3
+                var adjustedRating = recData.rating *(1/(recData.sources.length < 3 ? recData.sources.length % 3 : 1));
+                //If the rating value was so small that it increased ignore that calc, otherwise just return the adjusted rating
+                show.rating = adjustedRating <= recData.rating ? adjustedRating : recData.rating;
                 show.sources = recData.sources;
                 show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
                 finalObject.push(show);
