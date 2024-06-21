@@ -207,7 +207,6 @@ function userSearch(req, res, params) {
                 }
             }
          }
-         console.log(recs);
          //Take the results of the recs and remove any below 0 recs, then remove an entries which already are on completed, then sort by rating, then cut to just the top 200
         var results = recs.filter((rec) => rec.rating > 0)
         .filter((rec) => entries.find((entry) => entry.media.id === rec.id) == null)

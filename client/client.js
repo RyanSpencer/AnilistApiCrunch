@@ -48,7 +48,30 @@ $(document).ready(function(){
             recs: [],
             titleLanguage: "english",
             loading: false,
-            sources: []
+            sources: [],
+            formats: [
+                {name: "Tv",
+                value: "TV",
+                active: true},
+                {name: "Tv Short",
+                value: "TV_SHORT",
+                active: true},
+                {name: "Movie",
+                value: "MOVIE",
+                active: true},
+                {name: "Special",
+                value: "Special",
+                active: true},
+                {name: "OVA",
+                value: "OVA",
+                active: true},
+                {name: "ONA",
+                value: "ONA",
+                active: true},
+                {name: "Music Video",
+                value: "MUSIC",
+                active: true}
+            ]
         }
     });
 
@@ -59,7 +82,15 @@ $(document).ready(function(){
                 return rec.id === button.data('animeId');
             });
         app.sources = rec.sources;
-    })
+    });
+
+    $('input[type="checkbox"], input[type="radio"]').on('change', function () { 
+        app.recs.map((rec)=> {
+            var format = app.formats.find((format) => format.value === rec.format);
+            rec.show = format.active;
+            return rec;
+        });
+    });
 
     $("#searchForm").submit(function(e) {
         var action = $("#searchForm").attr("action");
@@ -78,6 +109,9 @@ $(document).ready(function(){
             data: dataObj,
             dataType: "JSON",
             success: function(result, status, xhr) {
+                result.map((rec) => {
+                    rec.show = true;
+                })
                 app.recs = result;
                 app.loading = false
                 $(document).ready(function(e) {
@@ -86,7 +120,7 @@ $(document).ready(function(){
                             siteCon.classList.add("non-scroll-container");
                         }
                     })
-                })
+                })                
             },
             error: function(error, status, xhr) {
                 app.loading = false;

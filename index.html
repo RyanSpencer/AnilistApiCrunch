@@ -31,17 +31,23 @@
             <div id="apiCall"  v-if="loading" class="spinner-border d-flex justify-content-center" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-            <div id = "dataArea" v-if="!loading && recs.length > 0">
+            <div id = "dataArea" v-show="!loading && recs.length > 0">
                 <div id="view-preferences">
                     <label class="form-check-label" for="romajiName">Use Romaji: </label>
                     <input class="form-check-input" v-model="titleLanguage" value="romaji" type="radio" id="romanjiName" name="nameRadio">
                     
                     <label class="form-check-label" for="englishName">Use English: </label>
                     <input class= "form-check-input" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" checked>
+                    <div id="format-preferences">
+                        <label v-for="format in formats" class="form-check-label" :for="format.name">{{format.name}}
+                            <input class="form-check-input" v-model="format.active" type="checkbox" :name="format.name" :value="format.value" checked>
+                        </label>
+                    </div>
                 </div>
                 <div id="result" class="row row-cols-5 gy-3">
                     <anime-rec
                         v-for= "rec in recs"
+                        v-if= "rec.show"
                         v-bind:rec="rec"
                         v-bind:key="rec.id"
                         v-bind:title-language="titleLanguage"
