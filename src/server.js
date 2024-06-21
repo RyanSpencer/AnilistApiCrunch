@@ -67,7 +67,7 @@ function userSearch(req, res, params) {
                             english
                             romaji
                         }
-                        recommendations {
+                        recommendations(sort: RATING_DESC) {
                           edges {
                             node {
                               mediaRecommendation {
@@ -118,6 +118,7 @@ function userSearch(req, res, params) {
     }
 
     function handleResponse(response) {
+        console.log(response);
         return response.json().then(function (json) {
             return response.ok ? json : Promise.reject();
         });
@@ -293,11 +294,14 @@ function userSearch(req, res, params) {
     }
 }
 
-//Calculate rating by getting how many upvotes out of total given to the reccs it has, then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive (score 10 example, we pass in format half so it works for all)
+/*Calculate rating by getting how many upvotes out of total given to the reccs it has, 
+then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive (score 10 example, we pass in format half so it works for all)
+Then multiply by certanty, which reads how many digits of total upvotes we have. 2 digits is the base, 3 digits is a two times multipler, and 4 digits is a three times*/
 function calculateRating(score, upvotes, totalUpvotes, formatHalf) {
     var percentage = upvotes / totalUpvotes;
     var relativeScore = score - formatHalf;
-    return relativeScore * percentage;
+    var certantityAdjustment = totalUpvotes.toString().length - 1;
+    return relativeScore * percentage * certantityAdjustment;
 }
 
 http.createServer(onRequest).listen(port);
