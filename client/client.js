@@ -49,6 +49,8 @@ $(document).ready(function(){
             titleLanguage: "english",
             loading: false,
             sources: [],
+            startYear: 1940,
+            endYear: new Date().getFullYear() + 1,
             formats: [
                 {name: "Tv",
                 value: "TV",
@@ -83,8 +85,14 @@ $(document).ready(function(){
             });
         app.sources = rec.sources;
     });
+    $('input[type="range').on('change', function(){
+        app.recs.map((rec)=> {
+            rec.show = rec.seasonYear >= app.startYear && rec.seasonYear <= app.endYear;
+            return rec;
+        });
+    })
 
-    $('input[type="checkbox"], input[type="radio"]').on('change', function () { 
+    $('input[type="checkbox"]').on('change', function () { 
         app.recs.map((rec)=> {
             var format = app.formats.find((format) => format.value === rec.format);
             rec.show = format.active;

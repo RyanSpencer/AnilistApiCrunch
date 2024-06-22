@@ -43,6 +43,14 @@
                             <input class="form-check-input" v-model="format.active" type="checkbox" :name="format.name" :value="format.value" checked>
                         </label>
                     </div>
+                    <div id="year-range">
+                        <label class="form-check-label" for="afterYear">After: {{startYear}}
+                            <input class="form-input" type="range" id="afterYear" v-model="startYear" name="afterYear" min="1940" :max="endYear">
+                        </label>
+                        <label  class="form-check-label" for="beforeYear">Before: {{endYear}}
+                            <input class="form-input" type="range" id="beforeYear" v-model="endYear" name="beforeYear" :min="startYear" max="2025">
+                        </label>
+                    </div>
                 </div>
                 <div id="result" class="row row-cols-5 gy-3">
                     <anime-rec
