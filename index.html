@@ -55,7 +55,7 @@
                 <div id="result" class="row row-cols-5 gy-3">
                     <anime-rec
                         v-for= "rec in recs"
-                        v-if= "rec.show"
+                        v-show= "rec.show"
                         v-bind:rec="rec"
                         v-bind:key="rec.id"
                         v-bind:title-language="titleLanguage"

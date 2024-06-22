@@ -8,17 +8,23 @@ var app,
     template: `
         <div class="col">
             <div class="card h-100">
+                <button type="button" class="btn btn-info btn-description-data" v-bind:data-anime-id="rec.id">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                    </svg>
+                </button>
                 <button type="button" class="btn btn-secondary btn-rec-data" data-bs-toggle="modal" data-bs-target="#recDataModal" v-bind:data-anime-id="rec.id">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
                         <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
                     </svg>
                 </button>
                 <div class="background-image" :style="getImageUrl(rec.coverImage.extraLarge)">
+                    <div class="card-text" v-html="rec.description" v-if="rec.displayDesc"></div>
                 </div>
                 <div class="card-body">
                     <h4 class="card-title" v-if="(titleLanguage === 'english' && rec.title.english != null ) || rec.title.romaji == null">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
                     <h4 class="card-title" v-if="(titleLanguage === 'romaji' && rec.title.romaji != null ) || rec.title.english == null">{{rec.title.romaji}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
-                    <div class="card-text" v-html="rec.description"></div>
                     <p>{{rec.episodes}} Episodes</p>
                 </div>
                 <div class="card-footer">
@@ -91,7 +97,7 @@ $(document).ready(function(){
             rec.show = format.active && rec.seasonYear >= app.startYear && rec.seasonYear <= app.endYear;
             return rec;
         });
-    })
+    });
 
     $("#searchForm").submit(function(e) {
         var action = $("#searchForm").attr("action");
@@ -112,6 +118,7 @@ $(document).ready(function(){
             success: function(result, status, xhr) {
                 result.map((rec) => {
                     rec.show = true;
+                    rec.displayDesc = false;
                 })
                 app.recs = result;
                 app.loading = false
@@ -121,7 +128,16 @@ $(document).ready(function(){
                             siteCon.classList.add("non-scroll-container");
                         }
                     })
-                })                
+                    
+                    $('.btn-description-data').on('click',function(e) {
+                        e.preventDefault();
+                        var button = $(e.currentTarget),
+                        rec = app.recs.find( rec => {
+                            return rec.id === button.data('animeId');
+                        });
+                        rec.displayDesc = !rec.displayDesc;
+                    });
+                });
             },
             error: function(error, status, xhr) {
                 app.loading = false;

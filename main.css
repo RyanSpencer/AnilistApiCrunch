@@ -42,18 +42,21 @@
 .last-link {
     margin-right: 0px !important;
 }
-.card-body {
-    overflow-y: auto;
-    height: 25em;
-    scrollbar-width: thin;
-}
 .btn-rec-data {
     position: absolute;
     right: 0;
-    padding: 5px;
+    padding: 2px;
     display: flex;
-    background: rgba(0,0,0,0);
-    border: none;
+    border-radius: 50%;
+    margin: 3px;
+}
+.btn-description-data {
+    position: absolute;
+    left: 0;
+    padding: 2px;
+    display: flex;
+    border-radius: 50%;
+    margin: 3px;
 }
 #view-preferences {
     padding: 15px;
@@ -61,4 +64,14 @@
 }
 #apiCall {
     margin: auto;
+}
+.card-text {
+    background: rgba(0,0,0,0.7);
+    margin: auto;
+    padding: 10px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-top: 40px;
+    color: white;
+    height: 35em;
 }
