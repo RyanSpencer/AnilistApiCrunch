@@ -62,7 +62,7 @@ $(document).ready(function(){
                 value: "MOVIE",
                 active: true},
                 {name: "Special",
-                value: "Special",
+                value: "SPECIAL",
                 active: true},
                 {name: "OVA",
                 value: "OVA",
@@ -95,7 +95,8 @@ $(document).ready(function(){
     $('input[type="checkbox"]').on('change', function () { 
         app.recs.map((rec)=> {
             var format = app.formats.find((format) => format.value === rec.format);
-            rec.show = format.active;
+            if (format != null) 
+                rec.show = format.active;
             return rec;
         });
     });
