@@ -85,21 +85,13 @@ $(document).ready(function(){
             });
         app.sources = rec.sources;
     });
-    $('input[type="range').on('change', function(){
+    $('input[type="range"], input[type="checkbox"]').on('change', function(){
         app.recs.map((rec)=> {
-            rec.show = rec.seasonYear >= app.startYear && rec.seasonYear <= app.endYear;
+            var format = app.formats.find((format) => format.value === rec.format);
+            rec.show = format.active && rec.seasonYear >= app.startYear && rec.seasonYear <= app.endYear;
             return rec;
         });
     })
-
-    $('input[type="checkbox"]').on('change', function () { 
-        app.recs.map((rec)=> {
-            var format = app.formats.find((format) => format.value === rec.format);
-            if (format != null) 
-                rec.show = format.active;
-            return rec;
-        });
-    });
 
     $("#searchForm").submit(function(e) {
         var action = $("#searchForm").attr("action");
