@@ -120,21 +120,24 @@ $(document).ready(function(){
             app.currentPage = pages;
         }
         app.recs = shownRecs.slice((app.currentPage - 1) * 25 , app.currentPage * 25);
-        for(i = 1; i <= 8; i++) {
-            var pageButton = document.getElementById(i + '-page-link');
-            if (i > pages) {
-                pageButton.classList.add('disabled')
-            }
-            else {
-                pageButton.classList.remove('disabled');
-            }
-        }
         $(document).ready(function(e) {
             Array.from(document.getElementsByClassName("site-link-container")).forEach((siteCon) => {
                 if (siteCon.scrollWidth <= siteCon.clientWidth) {
                     siteCon.classList.add("non-scroll-container");
                 }
             })
+            for(i = 1; i <= 8; i++) {
+                var pageButton = document.getElementById(i + '-page-link'),
+                    bottomButton = document.getElementById(i + '-page-link-bottom');
+                if (i > pages) {
+                    pageButton.classList.add('disabled');
+                    bottomButton.classList.add('disabled');
+                }
+                else {
+                    pageButton.classList.remove('disabled');
+                    bottomButton.classList.remove('disabled');
+                }
+            }
         });
     }
 

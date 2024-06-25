@@ -4,6 +4,14 @@
     background-size: cover;
     background-repeat: no-repeat;
 }
+#usernameSearch {
+    display: inline-flex;
+    width: auto;
+    vertical-align: middle;
+}
+#submitButton {
+    display: inline-flex;
+}
 #result {
     max-width: 80vw;
     margin: auto;
@@ -77,4 +85,15 @@
 }
 .empty-links {
     height: 71.5px;
+}
+.btn-group {
+    margin: 5px;
+}
+#year-range {
+    width: 20%;
+    margin: auto;
+    margin-right: 0px;
+}
+.custom-label-button {
+    opacity: 1 !important;
 }

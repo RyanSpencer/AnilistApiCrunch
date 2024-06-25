@@ -14,14 +14,16 @@
     <body>
         <div id="mainApp">
             <form id="searchForm" action="/userSearch" method="get">
-                <input id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
-                <input id="submitButton" type="submit" value="Search for Recs" :disabled="loading">
-                <label for="includeWatching" class="form-check-label">Include Currently Watching: </label>
-                <input id="includeWatching" class="form-check-input" type="checkbox" name="watching" checked>
-                <label for="includeDropped" class="form-check-label">Include Dropped: </label>
-                <input id="includeDropped" class="form-check-input" type="checkbox" name="dropped" checked>
-                <label for="includePaused" class="form-check-label">Include Paused: </label>
-                <input id="includePaused" class="form-check-input" type="checkbox" name="paused" checked>
+                <input class="form-control" id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
+                <input class="btn btn-primary" id="submitButton" type="submit" value="Search for Recs" :disabled="loading">
+                <div class="btn-group" role="group">
+                    <input id="includeWatching" class="btn-check" type="checkbox" name="watching" checked>
+                    <label for="includeWatching" class="btn btn-outline-secondary">Include Currently Watching</label>
+                    <input id="includeDropped" class="btn-check" type="checkbox" name="dropped" checked>
+                    <label for="includeDropped" class="btn btn-outline-secondary">Include Dropped</label>
+                    <input id="includePaused" class="btn-check" type="checkbox" name="paused" checked>
+                    <label for="includePaused" class="btn btn-outline-secondary">Include Paused</label>
+                </div>
             </form>
             <div v-if="fullRec.length === 0 && !loading">
                 <p>This is an app to get data from the anilist API. This search will return the top recommended anime based on your list. Enter you Anilist id in the text search. 
@@ -33,23 +35,26 @@
               </div>
             <div id = "dataArea" v-show="!loading && fullRec.length > 0">
                 <div id="view-preferences">
-                    <label class="form-check-label" for="romajiName">Use Romaji: </label>
-                    <input class="form-check-input" v-model="titleLanguage" value="romaji" type="radio" id="romanjiName" name="nameRadio">
-                    
-                    <label class="form-check-label" for="englishName">Use English: </label>
-                    <input class= "form-check-input" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" checked>
-                    <div id="format-preferences">
-                        <label v-for="format in formats" class="form-check-label" :for="format.name">{{format.name}}
-                            <input class="form-check-input" v-model="format.active" type="checkbox" :name="format.name" :value="format.value" checked>
-                        </label>
+                    <div class="btn-group" role="group">
+                        <input class="btn-check" v-model="titleLanguage" value="romaji" type="radio" id="romajiName" name="nameRadio" autocomplete="off">
+                        <label class="btn btn-outline-dark" for="romajiName">Use Romaji: </label>
+                        
+                        <input class= "btn-check" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" autocomplete="off" checked>
+                        <label class="btn btn-outline-dark" for="englishName">Use English: </label>
+                    </div>
+                    <br>
+                    <div id="format-preferences" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success custom-label-button" disabled>Click to toggle media type shown: </button> 
+                        <template v-for="format in formats">
+                            <input class="btn-check" v-model="format.active" type="checkbox" :id="format.name" :value="format.value" autocomplete="off" checked>
+                            <label class="btn btn-outline-success" :for="format.name">{{format.name}}</label>
+                        </template>
                     </div>
                     <div id="year-range">
-                        <label class="form-check-label" for="afterYear">After: {{startYear}}
-                            <input class="form-input" type="range" id="afterYear" v-model="startYear" name="afterYear" min="1940" :max="endYear">
-                        </label>
-                        <label  class="form-check-label" for="beforeYear">Before: {{endYear}}
-                            <input class="form-input" type="range" id="beforeYear" v-model="endYear" name="beforeYear" :min="startYear" max="2025">
-                        </label>
+                        <label class="form-label" for="afterYear">After: {{startYear}}</label>
+                        <input class="form-range" type="range" id="afterYear" v-model="startYear" name="afterYear" min="1940" :max="endYear">
+                        <label  class="form-label" for="beforeYear">Before: {{endYear}}</label>
+                        <input class="form-range" type="range" id="beforeYear" v-model="endYear" name="beforeYear" :min="startYear" max="2025">
                     </div>
                     <nav>
                         <ul class="pagination">
@@ -67,6 +72,12 @@
                     >
                     </anime-rec>
                 </div>
+                <br>
+                <nav>
+                    <ul class="pagination">
+                    <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link-bottom'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
+                    </ul>
+                </nav>
             </div>
             <div class="modal fade" id="recDataModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
