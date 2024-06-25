@@ -13,8 +13,8 @@
     display: inline-flex;
 }
 #result {
-    max-width: 80vw;
     margin: auto;
+    max-width: 80vw;
 }
 .card-iconlink {
     display:inline-block;
@@ -96,4 +96,36 @@
 }
 .custom-label-button {
     opacity: 1 !important;
+}
+@media(max-width: 2365px) {
+    #result {
+        max-width: none;
+    }
+}
+@media(max-width: 1920px) {
+    #result {
+        max-width: 80vw;
+    }
+}
+@media(max-width: 1420px) {
+    #result {
+        max-width: none;
+    }
+}
+@media(max-width: 1150px) {
+    #result {
+        max-width: 80vw;
+    }
+}
+
+@media(max-width: 950px) {
+    #result {
+        max-width: none;
+    }
+}
+
+@media(max-width: 775px) {
+    #result {
+        max-width: none;
+    }
 }

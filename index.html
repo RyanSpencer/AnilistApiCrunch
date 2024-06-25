@@ -57,12 +57,12 @@
                         <input class="form-range" type="range" id="beforeYear" v-model="endYear" name="beforeYear" :min="startYear" max="2025">
                     </div>
                     <nav>
-                        <ul class="pagination">
+                        <ul class="pagination justify-content-center pagination-lg ">
                           <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
                         </ul>
                       </nav>
                 </div>
-                <div id="result" class="row row-cols-5 gy-3">
+                <div id="result" v-bind:class="[cardcolumns, 'row', 'gy-3']">
                     <anime-rec
                         v-for= "rec in recs"
                         v-show= "rec.show"
@@ -74,8 +74,8 @@
                 </div>
                 <br>
                 <nav>
-                    <ul class="pagination">
-                    <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link-bottom'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
+                    <ul class="pagination justify-content-center pagination-lg ">
+                        <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link-bottom'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
                     </ul>
                 </nav>
             </div>

@@ -1,4 +1,5 @@
 var app,
+    cardcolumns = 'row-cols-5',
     animeCards = { props: ['rec', 'titleLanguage'], methods: {
         getImageUrl: function(image) {
             return 'background-image: url("' + image + '")';
@@ -56,6 +57,21 @@ $(document).ready(function(){
         components: {
             'anime-rec': animeCards
         },
+        mounted() {
+            this.handleResize();
+            window.addEventListener('resize', this.handleResize);
+        },
+        destroyed() {
+            window.removeEventListener('resize', this.handleResize);
+        },
+        methods: {
+            handleResize() {
+                var size1080p = window.matchMedia('(max-width: 1920px)').matches,
+                    size1024p = window.matchMedia('(max-width: 1150px)').matches,
+                    size775p = window.matchMedia('(max-width: 775px)').matches;
+                    this.cardcolumns = size1080p ? (size1024p ? (size775p ? 'row-cols-1' : 'row-cols-2'): 'row-cols-3') : 'row-cols-5';
+            }
+        },
         data: {
             recs: [],
             fullRec: [],
@@ -63,6 +79,7 @@ $(document).ready(function(){
             titleLanguage: "english",
             loading: false,
             sources: [],
+            cardcolumns: cardcolumns,
             startYear: 1940,
             endYear: new Date().getFullYear() + 1,
             formats: [
