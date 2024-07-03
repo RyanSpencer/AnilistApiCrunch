@@ -16,7 +16,7 @@
             <form id="searchForm" action="/userSearch" method="get">
                 <input class="form-control" id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
                 <input class="btn btn-primary" id="submitButton" type="submit" value="Search for Recs" :disabled="loading">
-                <div class="btn-group" role="group">
+                <div :class="{'btn-group': !mobile, 'btn-group-vertical': mobile}" role="group">
                     <input id="includeWatching" class="btn-check" type="checkbox" name="watching" checked>
                     <label for="includeWatching" class="btn btn-outline-secondary">Include Currently Watching</label>
                     <input id="includeDropped" class="btn-check" type="checkbox" name="dropped" checked>
@@ -44,7 +44,7 @@
                         <input class= "btn-check" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" autocomplete="off" checked>
                         <label class="btn btn-outline-dark" for="englishName">Use English: </label>
                     </div>
-                    <div id="format-preferences" class="btn-group" role="group">
+                    <div id="format-preferences" :class="{'btn-group': !mobile, 'btn-group-vertical': mobile}" role="group">
                         <button type="button" class="btn btn-outline-success custom-label-button" disabled>Click to toggle media type shown: </button> 
                         <template v-for="format in formats">
                             <input class="btn-check" v-model="format.active" type="checkbox" :id="format.name" :value="format.value" autocomplete="off" checked>
@@ -59,7 +59,7 @@
                     </div>
                     <br>
                     <nav>
-                        <ul class="pagination justify-content-center pagination-lg ">
+                        <ul class="pagination justify-content-center" :class="{'pagination-lg': !mobile}">
                           <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
                         </ul>
                       </nav>
@@ -76,7 +76,7 @@
                 </div>
                 <br>
                 <nav class="view-preferences">
-                    <ul class="pagination justify-content-center pagination-lg " style="margin-bottom: 0">
+                    <ul class="pagination justify-content-center" :class="{'pagination-lg': !mobile}" style="margin-bottom: 0">
                         <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link-bottom'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
                     </ul>
                 </nav>

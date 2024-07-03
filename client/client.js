@@ -70,6 +70,7 @@ $(document).ready(function(){
                     size1024p = window.matchMedia('(max-width: 1150px)').matches,
                     size775p = window.matchMedia('(max-width: 775px)').matches;
                     this.cardcolumns = size1080p ? (size1024p ? (size775p ? 'row-cols-1' : 'row-cols-2'): 'row-cols-3') : 'row-cols-5';
+                    this.mobile = size775p;
             }
         },
         data: {
@@ -80,6 +81,7 @@ $(document).ready(function(){
             loading: false,
             sources: [],
             rating: "",
+            mobile: false,
             cardcolumns: cardcolumns,
             startYear: 1940,
             endYear: new Date().getFullYear() + 1,

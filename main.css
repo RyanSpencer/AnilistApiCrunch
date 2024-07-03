@@ -132,6 +132,7 @@ body {
 .form-range {
     width: auto;
 }
+
 @media(max-width: 2365px) {
     #result {
         max-width: none;
@@ -162,5 +163,11 @@ body {
 @media(max-width: 775px) {
     #result {
         max-width: 80vw;
+    }
+    #year-range {
+        display: block;
+    }
+    #searchForm div {
+        margin-top: 10px;
     }
 }
