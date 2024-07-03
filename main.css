@@ -1,8 +1,23 @@
+body {
+    background: var(--bs-dark);
+}
+.spinner-border {
+    width: 10rem;
+    height: 10rem;
+}
+#searchForm .btn-group {
+    margin-left : 0;
+    padding-left: 0;
+}
 .background-image {
     height: 35rem;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    border-radius: 5px 5px 0px 0px;
+}
+.card {
+    border: none;
 }
 #usernameSearch {
     display: inline-flex;
@@ -66,9 +81,15 @@
     border-radius: 50%;
     margin: 3px;
 }
-#view-preferences {
+.view-preferences {
     padding: 15px;
-    text-align: right;
+    text-align: center;
+    background: var(--bs-gray-400);
+    margin: 25px;
+    border-radius: 50px;
+}
+.view-preferences div {
+    background: white;
 }
 #apiCall {
     margin: auto;
@@ -88,14 +109,24 @@
 }
 .btn-group {
     margin: 5px;
+    padding: 10px;
 }
 #year-range {
-    width: 20%;
-    margin: auto;
-    margin-right: 0px;
+    margin: 10px;
+    padding: 13px;
+    display: inline-flex;
+    border-radius: var(--bs-border-radius);
+    margin-left: 5px;
 }
 .custom-label-button {
     opacity: 1 !important;
+}
+.form-label {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+.form-range {
+    width: auto;
 }
 @media(max-width: 2365px) {
     #result {
@@ -126,6 +157,6 @@
 
 @media(max-width: 775px) {
     #result {
-        max-width: none;
+        max-width: 80vw;
     }
 }

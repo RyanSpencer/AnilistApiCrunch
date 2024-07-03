@@ -79,6 +79,7 @@ $(document).ready(function(){
             titleLanguage: "english",
             loading: false,
             sources: [],
+            rating: "",
             cardcolumns: cardcolumns,
             startYear: 1940,
             endYear: new Date().getFullYear() + 1,
@@ -115,6 +116,7 @@ $(document).ready(function(){
                 return rec.id === button.data('animeId');
             });
         app.sources = rec.sources;
+        app.rating = rec.rating.toLocaleString(undefined);
     });
     $('input[type="range"], input[type="checkbox"]').on('change', function(){
         app.fullRec.map((rec)=> {
@@ -178,6 +180,7 @@ $(document).ready(function(){
                 result.map((rec) => {
                     rec.show = true;
                     rec.displayDesc = false;
+                    preloadImage(rec.coverImage.extraLarge);
                 })
                 app.recs = result.slice(0, 25);
                 app.fullRec = result;
@@ -201,3 +204,9 @@ $(document).ready(function(){
         return false;
     });
 });
+
+function preloadImage(url)
+{
+    var img=new Image();
+    img.src=url;
+}

@@ -23,18 +23,20 @@
                     <label for="includeDropped" class="btn btn-outline-secondary">Include Dropped</label>
                     <input id="includePaused" class="btn-check" type="checkbox" name="paused" checked>
                     <label for="includePaused" class="btn btn-outline-secondary">Include Paused</label>
+                    <input id="doExponent" class="btn-check" type="checkbox" name="exponent">
+                    <label for="doExponent" class="btn btn-outline-secondary">Use Exponentional Calculation (Experimental)</label>
                 </div>
             </form>
-            <div v-if="fullRec.length === 0 && !loading">
+            <div v-if="fullRec.length === 0 && !loading" class=".text-body-emphasis">
                 <p>This is an app to get data from the anilist API. This search will return the top recommended anime based on your list. Enter you Anilist id in the text search. 
                     By default completed and rewatching are included, and only entries that score more than a zero are calculated. 
                     Each checkbox will allow you to include another list, which will add score entries to the calculation and not recomend any entries in the list to you</p>
             </div>
-            <div id="apiCall"  v-if="loading" class="spinner-border d-flex justify-content-center" role="status">
+            <div id="apiCall"  v-if="loading" class="spinner-border text-light d-flex justify-content-center" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
             <div id = "dataArea" v-show="!loading && fullRec.length > 0">
-                <div id="view-preferences">
+                <div class=".bg-light-subtle view-preferences">
                     <div class="btn-group" role="group">
                         <input class="btn-check" v-model="titleLanguage" value="romaji" type="radio" id="romajiName" name="nameRadio" autocomplete="off">
                         <label class="btn btn-outline-dark" for="romajiName">Use Romaji: </label>
@@ -42,7 +44,6 @@
                         <input class= "btn-check" v-model="titleLanguage" value="english" type="radio" id="englishName" name="nameRadio" autocomplete="off" checked>
                         <label class="btn btn-outline-dark" for="englishName">Use English: </label>
                     </div>
-                    <br>
                     <div id="format-preferences" class="btn-group" role="group">
                         <button type="button" class="btn btn-outline-success custom-label-button" disabled>Click to toggle media type shown: </button> 
                         <template v-for="format in formats">
@@ -56,6 +57,7 @@
                         <label  class="form-label" for="beforeYear">Before: {{endYear}}</label>
                         <input class="form-range" type="range" id="beforeYear" v-model="endYear" name="beforeYear" :min="startYear" max="2025">
                     </div>
+                    <br>
                     <nav>
                         <ul class="pagination justify-content-center pagination-lg ">
                           <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
@@ -73,8 +75,8 @@
                     </anime-rec>
                 </div>
                 <br>
-                <nav>
-                    <ul class="pagination justify-content-center pagination-lg ">
+                <nav class="view-preferences">
+                    <ul class="pagination justify-content-center pagination-lg " style="margin-bottom: 0">
                         <li class="page-item" v-for="page in 8" v-bind:class="{active: currentPage == page}" :id="page + '-page-link-bottom'"><a class="page-link" href=""  v-bind:data-page="page">{{page}}</a></li>
                     </ul>
                 </nav>
@@ -86,6 +88,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>                    
                         <div class="modal-body">
+                            {{rating}}
                             <div v-for="source in sources">
                                 <p>{{((titleLanguage === 'english' && source.englishName != null) || source.romajiName == null)? source.englishName : source.romajiName}} had {{source.upvotes}} out of {{source.totalUpvotes}} with a score of {{source.score}}</p> </br> 
                             </div>

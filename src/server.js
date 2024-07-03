@@ -194,14 +194,14 @@ function userSearch(req, res, params) {
                         }
                         return source;
                     })
-                    existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight);
+                    existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight, params.exponent);
                     existingRec.sources.push({englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0})
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 else {
                     recs.push({
                         id: recommendations[j].node.mediaRecommendation.id,
-                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight),
+                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight, params.exponent),
                         sources: [{englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0}]
                     })
                 }
@@ -310,11 +310,17 @@ function userSearch(req, res, params) {
 then mutliply by the score adjusted so 1-4 becomes negative, 5 is neutral, 6-10 is positive (score 10 example, we pass in format half so it works for all)
 Then multiply by certanty, which reads how many digits of total upvotes we have. 2 digits is the base, 3 digits is a two times multipler, and 4 digits is a three times
 divide by the number of sequels, the more the lower the impact the number is. If there are no sequels it is 1*/
-function calculateRating(score, upvotes, totalUpvotes, formatHalf, sequelDeweight) {
-    var percentage = upvotes / totalUpvotes;
+function calculateRating(score, upvotes, totalUpvotes, formatHalf, sequelDeweight, doExponent) {
+    var percentage = (upvotes / totalUpvotes) * 100;
     var relativeScore = score - formatHalf;
     var certantityAdjustment = totalUpvotes.toString().length - 1;
-    return (relativeScore * percentage * certantityAdjustment) /sequelDeweight;
+    if (doExponent) {
+        var modifier = relativeScore > 1 ? 1 : -1
+        return (modifier * (percentage**(Math.abs(relativeScore))) * certantityAdjustment) / sequelDeweight;
+    }
+    else {
+        return (relativeScore * percentage * certantityAdjustment) / sequelDeweight;
+    }
 }
 
 http.createServer(onRequest).listen(port);
