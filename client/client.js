@@ -117,11 +117,13 @@ var app,
             <div class="list-group">
                 <a :href="franchiseObject.original.siteUrl" target="_blank" 
                     class="list-group-item list-group-item-action active"> 
-                    <p class="franchise-name">{{((titleLanguage === 'english' && franchiseObject.original.english != null ) ||franchiseObject.original.romaji == null) ? franchiseObject.original.english : franchiseObject.original.romaji}}
+                    <p style="margin-left: 10px" class="franchise-name">{{((titleLanguage === 'english' && franchiseObject.original.english != null ) ||franchiseObject.original.romaji == null) ? franchiseObject.original.english : franchiseObject.original.romaji}}
                         <span v-if="franchiseObject.original.status" class="badge" v-bind:class="{'text-bg-success': franchiseObject.original.status == 'COMPLETED', 'text-bg-primary': franchiseObject.original.status == 'CURRENT', 'text-bg-danger': franchiseObject.original.status == 'DROPPED', 'text-bg-warning' : franchiseObject.original.status == 'PAUSED', 'text-bg-info': franchiseObject.original.status == 'PLANNING', 'text-bg-secondary': franchiseObject.original.status == 'REPEATING'}">{{franchiseObject.original.status}}</span>
                     </p>
-                    <span v-if="franchiseObject.original.score" class="badge text-bg-dark">{{franchiseObject.original.score}}</span>
-                    <p>{{franchiseObject.original.progress ? franchiseObject.original.progress + " / " : "" }} {{franchiseObject.original.episodes}}</p>
+                    <div class="score-length"> 
+                        <span v-if="franchiseObject.original.score" class="badge text-bg-dark">{{franchiseObject.original.score}}</span>
+                        <p>{{franchiseObject.original.progress ? franchiseObject.original.progress + " / " : "" }} {{franchiseObject.original.episodes}}</p>
+                    </div>
                 </a>
                 <a v-for="follow in franchiseObject.following" 
                     :href="follow.siteUrl" target="_blank" class="list-group-item list-group-item-action"> 
