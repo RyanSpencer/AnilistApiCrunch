@@ -117,17 +117,21 @@ var app,
             <div class="list-group">
                 <a :href="franchiseObject.original.siteUrl" target="_blank" 
                     class="list-group-item list-group-item-action active"> 
-                    {{((titleLanguage === 'english' && franchiseObject.original.english != null ) ||franchiseObject.original.romaji == null) ? franchiseObject.original.english : franchiseObject.original.romaji}} 
-                    <span v-if="franchiseObject.original.status" class="badge text-bg-dark">{{franchiseObject.original.status}}</span>
-                    <p v-if="franchiseObject.original.score">{{franchiseObject.original.score}}</p>
+                    <p class="franchise-name">{{((titleLanguage === 'english' && franchiseObject.original.english != null ) ||franchiseObject.original.romaji == null) ? franchiseObject.original.english : franchiseObject.original.romaji}}
+                        <span v-if="franchiseObject.original.status" class="badge" v-bind:class="{'text-bg-success': franchiseObject.original.status == 'COMPLETED', 'text-bg-primary': franchiseObject.original.status == 'CURRENT', 'text-bg-danger': franchiseObject.original.status == 'DROPPED', 'text-bg-warning' : franchiseObject.original.status == 'PAUSED', 'text-bg-info': franchiseObject.original.status == 'PLANNING', 'text-bg-secondary': franchiseObject.original.status == 'REPEATING'}">{{franchiseObject.original.status}}</span>
+                    </p>
+                    <span v-if="franchiseObject.original.score" class="badge text-bg-dark">{{franchiseObject.original.score}}</span>
                     <p>{{franchiseObject.original.progress ? franchiseObject.original.progress + " / " : "" }} {{franchiseObject.original.episodes}}</p>
                 </a>
                 <a v-for="follow in franchiseObject.following" 
                     :href="follow.siteUrl" target="_blank" class="list-group-item list-group-item-action"> 
-                    {{((titleLanguage === 'english' && follow.english != null ) ||follow.romaji == null) ? follow.english : follow.romaji}}
-                    <span v-if="follow.status" class="badge text-bg-dark">{{follow.status}}</span>
-                    <p v-if="follow.score">{{follow.score}}</p>
-                    <p>{{follow.progress ? follow.progress + " / " : "" }} {{follow.episodes}}</p>
+                    <p style="margin-left: 10px" class="franchise-name">{{((titleLanguage === 'english' && follow.english != null ) ||follow.romaji == null) ? follow.english : follow.romaji}}
+                        <span v-if="follow.status" class="badge" v-bind:class="{'text-bg-success': follow.status == 'COMPLETED', 'text-bg-primary': follow.status == 'CURRENT', 'text-bg-danger': follow.status == 'DROPPED', 'text-bg-warning' : follow.status == 'PAUSED', 'text-bg-info': follow.status == 'PLANNING', 'text-bg-secondary': follow.status == 'REPEATING'}">{{follow.status}}</span>
+                    </p>
+                    <div class="score-length"> 
+                        <span v-if="follow.score" class="badge text-bg-dark">{{follow.score}}</span>
+                        <p>{{follow.progress ? follow.progress + " / " : "" }} {{follow.episodes}}</p>
+                    </div>
                 </a>
             </div>
         `

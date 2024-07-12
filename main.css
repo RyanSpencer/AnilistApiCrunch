@@ -135,10 +135,31 @@ body {
 
 #franchise-app .list-group {
     margin: 20px;
+    width: 30%;
+    display: inline-flex;
 }
 
-.list-group-item-action p{
-    display: inline;;
+.list-group-item-action {
+    text-align: left;
+}
+
+.list-group-item-action *{
+    display: inline-flex;
+}
+
+.franchise-name {
+    margin-bottom: 0px;
+}
+.franchise-name span {
+    margin-left: 10px;
+    height: 100%;
+}
+.score-length {
+    float: right;
+}
+.score-length span {
+    height: 100%;
+    margin-right: 5px;
 }
 
 @media(max-width: 2365px) {
