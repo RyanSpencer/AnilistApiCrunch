@@ -47,9 +47,7 @@
                         <label class="btn btn-outline-dark" for="englishNameFranchise">Use English: </label>
                     </div>
                 </div>
-                <p>
-                    Franchise App
-                </p>
+                <franchise-view v-show="!loading && franchises.length > 0" v-for="franchise in franchises" v-bind:key="franchise.original.id" v-bind:title-language="titleLanguage" v-bind:franchise-object="franchise" ></franchise-view>
                 
                 <div id="apiCall"  v-if="loading" class="spinner-border text-light d-flex justify-content-center" role="status">
                     <span class="visually-hidden">Loading...</span>

@@ -133,6 +133,14 @@ body {
     width: auto;
 }
 
+#franchise-app .list-group {
+    margin: 20px;
+}
+
+.list-group-item-action p{
+    display: inline;;
+}
+
 @media(max-width: 2365px) {
     #result {
         max-width: none;

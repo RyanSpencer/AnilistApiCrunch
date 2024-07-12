@@ -70,6 +70,8 @@ var app,
                 data: dataObj,
                 dataType: "JSON",
                 success: function(result, status, xhr) {
+                    console.log(result);
+                    console.log(action);
                     if (action == app.recommedationsForm.action) {
                         result.map((rec) => {
                             rec.show = true;
@@ -87,7 +89,7 @@ var app,
                         });
                     }
                     else if (action == app.franchiseForm.action) {
-
+                        app.franchises = result;
                     }
                     app.loading = false
                 },
@@ -109,15 +111,35 @@ var app,
                 <slot></slot>
             </form>
         `
-        
-    };
+    },
+    franchiseView = { props: ['franchiseObject', "titleLanguage"],
+        template: `
+            <div class="list-group">
+                <a :href="franchiseObject.original.siteUrl" target="_blank" 
+                    class="list-group-item list-group-item-action active"> 
+                    {{((titleLanguage === 'english' && franchiseObject.original.english != null ) ||franchiseObject.original.romaji == null) ? franchiseObject.original.english : franchiseObject.original.romaji}} 
+                    <span v-if="franchiseObject.original.status" class="badge text-bg-dark">{{franchiseObject.original.status}}</span>
+                    <p v-if="franchiseObject.original.score">{{franchiseObject.original.score}}</p>
+                    <p>{{franchiseObject.original.progress ? franchiseObject.original.progress + " / " : "" }} {{franchiseObject.original.episodes}}</p>
+                </a>
+                <a v-for="follow in franchiseObject.following" 
+                    :href="follow.siteUrl" target="_blank" class="list-group-item list-group-item-action"> 
+                    {{((titleLanguage === 'english' && follow.english != null ) ||follow.romaji == null) ? follow.english : follow.romaji}}
+                    <span v-if="follow.status" class="badge text-bg-dark">{{follow.status}}</span>
+                    <p v-if="follow.score">{{follow.score}}</p>
+                    <p>{{follow.progress ? follow.progress + " / " : "" }} {{follow.episodes}}</p>
+                </a>
+            </div>
+        `
+    }
 
 $(document).ready(function(){
     app = new Vue({
         el:'#mainApp',
         components: {
             'anime-rec': animeCards,
-            'anilist-form': anilistQueryForm
+            'anilist-form': anilistQueryForm,
+            'franchise-view': franchiseView
         },
         mounted() {
             this.handleResize();
@@ -141,6 +163,7 @@ $(document).ready(function(){
         data: {
             recs: [],
             fullRec: [],
+            franchises: [],
             currentPage: 1,
             titleLanguage: "english",
             loading: false,

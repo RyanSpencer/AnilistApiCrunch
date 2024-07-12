@@ -95,7 +95,8 @@ function formatEntry(preFormatted, relationType) {
     formmated.id = preFormatted.id;
     formmated.episodes = preFormatted.episodes;
     formmated.relationType = preFormatted.relationType;
-    formmated.relationType = relationType
+    formmated.relationType = relationType;
+    formmated.siteUrl = preFormatted.siteUrl;
     return formmated;
 } 
 
@@ -135,6 +136,7 @@ async function franchiseSearch(req, res, params) {
                           romaji
                           english
                         }
+                        siteUrl
                         startDate {
                             year
                             month
@@ -152,6 +154,7 @@ async function franchiseSearch(req, res, params) {
                                 month
                                 day
                               }
+                              siteUrl
                               title {
                                 romaji
                                 english
@@ -276,7 +279,6 @@ async function franchiseSearch(req, res, params) {
         })
     })
 
-    console.log(filteredDownFranchises);
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.write(JSON.stringify(filteredDownFranchises));
     res.end();
