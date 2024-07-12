@@ -87,7 +87,7 @@ var app,
                         });
                     }
                     else if (action == app.franchiseForm.action) {
-                        
+
                     }
                     app.loading = false
                 },
@@ -110,7 +110,7 @@ var app,
             </form>
         `
         
-    }
+    };
 
 $(document).ready(function(){
     app = new Vue({

@@ -38,6 +38,15 @@
                 <anilist-form v-bind:form-data="franchiseForm" v-bind:loads="loading">
 
                 </anilist-form>
+                <div class=".bg-light-subtle view-preferences">
+                    <div class="btn-group" role="group">
+                        <input class="btn-check" v-model="titleLanguage" value="romaji" type="radio" id="romajiNameFranchise" name="franchiseNameRadio" autocomplete="off">
+                        <label class="btn btn-outline-dark" for="romajiNameFranchise">Use Romaji: </label>
+                        
+                        <input class= "btn-check" v-model="titleLanguage" value="english" type="radio" id="englishNameFranchise" name="franchiseNameRadio" autocomplete="off" checked>
+                        <label class="btn btn-outline-dark" for="englishNameFranchise">Use English: </label>
+                    </div>
+                </div>
                 <p>
                     Franchise App
                 </p>

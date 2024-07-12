@@ -21,7 +21,8 @@ const mediaStatus = {
     {name: "POINT_3", half: 2 }
 ], mediaRelation = {
     adapt: "ADAPTION",
-    char: "CHARACTER"
+    char: "CHARACTER",
+    org: "ORIGINAL"
 }
 
 var location = `https://graphql.anilist.co`,
@@ -83,20 +84,18 @@ function onRequest(req, res) {
     }
 }
 
-function formatEntry(preFormatted) {
+function formatEntry(preFormatted, relationType) {
     var formmated = {}
     formmated.romaji = preFormatted.title.romaji;
     formmated.english = preFormatted.title.english;
-    if(preFormatted.startDate.year == 1899) {
+    if(preFormatted.startDate.year == null) {
         preFormatted.startDate.year = 2050;
     }
     formmated.startDate = new Date(preFormatted.startDate.year, preFormatted.startDate.month, preFormatted.startDate.day)
     formmated.id = preFormatted.id;
     formmated.episodes = preFormatted.episodes;
     formmated.relationType = preFormatted.relationType;
-    if(formmated.relationType == null) {
-        formmated.relationType = "ORIGINAL";
-    }
+    formmated.relationType = relationType
     return formmated;
 } 
 
@@ -186,18 +185,18 @@ async function franchiseSearch(req, res, params) {
 
     allEntries.forEach((entry) => {
         var relations = entry.media.relations.edges,
-            finalObject = {original: addUserInfo(formatEntry(entry.media), entry.score, entry.status, entry. progress), following: []};
+            finalObject = {original: addUserInfo(formatEntry(entry.media, mediaRelation.org), entry.score, entry.status, entry. progress), following: []};
         relations.forEach((relation) => {
             if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA") {
                 return;
             }
-            finalObject.following.push(formatEntry(relation.node));
+            finalObject.following.push(formatEntry(relation.node, relation.relationType));
         })
 
         //atempt to search through all existing entries, specifically their relations to see if we found one
         var foundRelation = {};
         var existingEntry = finalObjects.find((entrytwo) => {
-            entrytwo.following.find((relation) => {
+            return entrytwo.following.find((relation) => {
                 if(finalObject.original.id == relation.id) {
                     foundRelation = relation;
                     return true;
@@ -210,7 +209,10 @@ async function franchiseSearch(req, res, params) {
             //If we did and its older than the original, it should be the start of the chain
             if (existingEntry.original.startDate > finalObject.original.startDate && foundRelation.relationType != mediaRelation.char) {
                 //make the first original be a relation and then overwrite the original
-                existingEntry.original.relationType = finalObject.following.find((follow) => follow.id == existingEntry.orignal.id ).relationType
+                var relationLink = finalObject.following.find((follow) => follow.id == existingEntry.original.id )
+                if (relationLink) {
+                    existingEntry.original.relationType = relationLink.relationType
+                }
                 existingEntry.following.push(existingEntry.original);
                 existingEntry.original = finalObject.original;
             } else {
