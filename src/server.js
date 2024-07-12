@@ -112,7 +112,7 @@ function pruneDuplicates(newList, originalList, original ) {
     //loop through all of the new relations
     newList.forEach((relation) => {
         //If we look through the original list of relations and don't find it, its new so add it the array. We also don't want to add the oringal itself
-        if (!originalList.find((existingRelations) => existingRelations.id === relation.id) && original.id != relation.id){
+        if (!originalList.find((existingRelations) => existingRelations.id == relation.id) && original.id != relation.id){
             newToAdd.push(relation);
         }
     });
@@ -123,7 +123,7 @@ function pruneDuplicates(newList, originalList, original ) {
 async function franchiseSearch(req, res, params) {
     var queryString = `
         query($id: String) {
-                MediaListCollection(userName: $id, type: ANIME) {
+                MediaListCollection(userName: $id, type: ANIME, sort: MEDIA_ID) {
                   lists {
                     status
                     entries {
@@ -207,23 +207,29 @@ async function franchiseSearch(req, res, params) {
                 return  false
             })
         });
-
         if (existingEntry) {
+            //Existing entry = original show + its relations
+            //final object = current show + its interations
             //If we did and its older than the original, it should be the start of the chain
             if (existingEntry.original.startDate > finalObject.original.startDate && foundRelation.relationType != mediaRelation.char) {
-                //make the first original be a relation and then overwrite the original
+                //final current shows relation to original show
                 var relationLink = finalObject.following.find((follow) => follow.id == existingEntry.original.id )
                 if (relationLink) {
                     existingEntry.original.relationType = relationLink.relationType
                 }
+                //Add original show as a relation to new show
                 existingEntry.following.push(existingEntry.original);
+                //remove new show from array of relations
+                existingEntry.following.splice(existingEntry.following.findIndex((originalLink) => {
+                    return originalLink.id == finalObject.original.id;
+                }), 1);
                 existingEntry.original = finalObject.original;
             } else {
                 //If it's a newer work we still want to add it to the list of relations
                 var existingRelation = existingEntry.following.find((relation) => relation.id == finalObject.original.id)
                 //If it already was a relation we just want to add on new info like score and status
                 if (existingRelation) {
-                    addUserInfo(existingRelation);
+                    addUserInfo(existingRelation, finalObject.original.score, finalObject.original.status, finalObject.original.progress);
                 }
                 //If not we just want to add it
                 else {
