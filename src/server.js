@@ -190,7 +190,7 @@ async function franchiseSearch(req, res, params) {
         var relations = entry.media.relations.edges,
             finalObject = {original: addUserInfo(formatEntry(entry.media, mediaRelation.org), entry.score, entry.status, entry. progress), following: []};
         relations.forEach((relation) => {
-            if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA") {
+            if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA" || relation.relationType == mediaRelation.char) {
                 return;
             }
             finalObject.following.push(formatEntry(relation.node, relation.relationType));
@@ -207,6 +207,15 @@ async function franchiseSearch(req, res, params) {
                 return  false
             })
         });
+        if (existingEntry == null) {
+            existingEntry = finalObjects.find((entryTwo) => {
+                return entryTwo.following.find((relation) => {
+                    return finalObject.following.find((relationTwo) => {
+                        return relation.id == relationTwo.id;
+                    })
+                });
+            })
+        }
         if (existingEntry) {
             //Existing entry = original show + its relations
             //final object = current show + its interations
