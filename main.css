@@ -9,7 +9,7 @@ body {
     width: 10rem;
     height: 10rem;
 }
-#searchForm .btn-group {
+.search-form .btn-group {
     margin-left : 0;
     padding-left: 0;
 }
@@ -47,7 +47,7 @@ body {
     background: #2b2d42;
 }
 
-#searchForm {
+.search-form {
     margin: 10px;
     text-align: center;
 }
@@ -167,7 +167,7 @@ body {
     #year-range {
         display: block;
     }
-    #searchForm div {
+    .search-form div {
         margin-top: 10px;
     }
 }

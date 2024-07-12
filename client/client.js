@@ -1,6 +1,7 @@
 var app,
     cardcolumns = 'row-cols-5',
-    animeCards = { props: ['rec', 'titleLanguage'], methods: {
+    animeCards = { props: ['rec', 'titleLanguage'], 
+    methods: {
         getImageUrl: function(image) {
             return 'background-image: url("' + image + '")';
         },
@@ -49,13 +50,74 @@ var app,
             </div>
         </div>
     `
+    },
+    anilistQueryForm = { props: ['formData', 'loads'],
+        methods: {
+          submitApiCall: function(e) {
+            var action = $('#' + e.target.id).attr("action");
+            var formData = $('#' + e.target.id).serializeArray();
+    
+            var dataObj = {};
+            formData.forEach((data) => {
+                dataObj[data.name] = data.value
+            })
+            
+            app.loading = true;
+            $.ajax({
+                cache: false,
+                type: 'get',
+                url: action,
+                data: dataObj,
+                dataType: "JSON",
+                success: function(result, status, xhr) {
+                    if (action == app.recommedationsForm.action) {
+                        result.map((rec) => {
+                            rec.show = true;
+                            rec.displayDesc = false;
+                            preloadImage(rec.coverImage.extraLarge);
+                        })
+                        app.recs = result.slice(0, 25);
+                        app.fullRec = result;
+                        $(document).ready(function(e) {
+                            Array.from(document.getElementsByClassName("site-link-container")).forEach((siteCon) => {
+                                if (siteCon.scrollWidth <= siteCon.clientWidth) {
+                                    siteCon.classList.add("non-scroll-container");
+                                }
+                            })
+                        });
+                    }
+                    else if (action == app.franchiseForm.action) {
+                        
+                    }
+                    app.loading = false
+                },
+                error: function(error, status, xhr) {
+                    app.loading = false;
+                    var resultText = JSON.stringify(error);
+                    $("#result").text(resultText);
+                }
+            });
+    
+            e.preventDefault();
+            return false;
+          }  
+        },
+        template: `
+            <form class="search-form" :id="formData.id" :action="formData.action" :method="formData.get" v-on:submit="submitApiCall($event)">
+                <input class="form-control" id="usernameSearch" type="text" name="term" placeholder="Your AniList Username">
+                <input class="btn btn-primary" id="submitButton" type="submit" :value="formData.value" :disabled="loads">
+                <slot></slot>
+            </form>
+        `
+        
     }
 
 $(document).ready(function(){
     app = new Vue({
         el:'#mainApp',
         components: {
-            'anime-rec': animeCards
+            'anime-rec': animeCards,
+            'anilist-form': anilistQueryForm
         },
         mounted() {
             this.handleResize();
@@ -71,6 +133,9 @@ $(document).ready(function(){
                     size775p = window.matchMedia('(max-width: 775px)').matches;
                     this.cardcolumns = size1080p ? (size1024p ? (size775p ? 'row-cols-1' : 'row-cols-2'): 'row-cols-3') : 'row-cols-5';
                     this.mobile = size775p;
+            },
+            setPage(page) {
+                this.section = page;
             }
         },
         data: {
@@ -79,7 +144,20 @@ $(document).ready(function(){
             currentPage: 1,
             titleLanguage: "english",
             loading: false,
+            section: 'recomendations-app',
             sources: [],
+            recommedationsForm: {
+                id: 'rec-form',
+                action: '/userSearch',
+                method: 'get',
+                value: 'Search for Recs'
+            },
+            franchiseForm: {
+                id: 'franchise-form',
+                action: '/franchiseSearch',
+                method: 'get',
+                value: 'Get Franchise List'
+            },
             rating: "",
             mobile: false,
             cardcolumns: cardcolumns,
@@ -161,50 +239,6 @@ $(document).ready(function(){
             }
         });
     }
-
-    $("#searchForm").submit(function(e) {
-        var action = $("#searchForm").attr("action");
-        var formData = $("#searchForm").serializeArray();
-
-        var dataObj = {};
-        formData.forEach((data) => {
-            dataObj[data.name] = data.value
-        })
-        
-        app.loading = true;
-        $.ajax({
-            cache: false,
-            type: 'get',
-            url: action,
-            data: dataObj,
-            dataType: "JSON",
-            success: function(result, status, xhr) {
-                result.map((rec) => {
-                    rec.show = true;
-                    rec.displayDesc = false;
-                    preloadImage(rec.coverImage.extraLarge);
-                })
-                app.recs = result.slice(0, 25);
-                app.fullRec = result;
-                app.loading = false
-                $(document).ready(function(e) {
-                    Array.from(document.getElementsByClassName("site-link-container")).forEach((siteCon) => {
-                        if (siteCon.scrollWidth <= siteCon.clientWidth) {
-                            siteCon.classList.add("non-scroll-container");
-                        }
-                    })
-                });
-            },
-            error: function(error, status, xhr) {
-                app.loading = false;
-                var resultText = JSON.stringify(error);
-                $("#result").text(resultText);
-            }
-        });
-
-        e.preventDefault();
-        return false;
-    });
 });
 
 function preloadImage(url)
