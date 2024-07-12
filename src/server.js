@@ -13,14 +13,47 @@ const mediaStatus = {
     drop: "DROPPED",
     pause: "PAUSED",
     repeat: "REPEATING"
-};
-const scoreFormat = [
+}, scoreFormat = [
     {name: "POINT_100", half: 50},
     {name: "POINT_10_DECIMAL", half: 5},
     {name: "POINT_10", half: 5},
     {name: "POINT_5", half: 3 },
     {name: "POINT_3", half: 2 }
-]
+], mediaRelation = {
+    adapt: "ADAPTION",
+    char: "CHARACTER",
+    org: "ORIGINAL"
+}
+
+var location = `https://graphql.anilist.co`,
+options ={
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+    body: {}
+};
+
+
+function handleError(error) {
+    console.log(error);
+    res.writeHead(500, {'Content-Type': 'application/json'});
+    var responseMessage = {
+        message: "Failed to connect to anilist. Check Username info and try again",
+        error: error
+    };
+
+    res.write(JSON.stringify(responseMessage));
+    res.end();
+}
+
+function handleResponse(response) {
+    console.log(response);
+    return response.json().then(function (json) {
+        return response.ok ? json : Promise.reject();
+    });
+}
 
 
 function onRequest(req, res) {
@@ -36,6 +69,9 @@ function onRequest(req, res) {
     if(pathObj.pathname === "/userSearch") {
         res = userSearch(req, res, params);
     }
+    if (pathObj.pathname === '/franchiseSearch'){
+        res = franchiseSearch(req, res, params);
+    }
     if (pathObj.pathname === "/client/client.js") {
         res.writeHead(200, {"Content-Type": "text/javascript"});
         res.write(scriptFile);
@@ -46,6 +82,208 @@ function onRequest(req, res) {
         res.write(cssFile);
         res.end();
     }
+}
+
+function formatEntry(preFormatted, relationType) {
+    var formmated = {}
+    formmated.romaji = preFormatted.title.romaji;
+    formmated.english = preFormatted.title.english;
+    if(preFormatted.startDate.year == null) {
+        preFormatted.startDate.year = 2050;
+    }
+    formmated.startDate = new Date(preFormatted.startDate.year, preFormatted.startDate.month, preFormatted.startDate.day)
+    formmated.id = preFormatted.id;
+    formmated.episodes = preFormatted.episodes;
+    formmated.relationType = preFormatted.relationType;
+    formmated.relationType = relationType;
+    formmated.siteUrl = preFormatted.siteUrl;
+    return formmated;
+} 
+
+function addUserInfo(formatted, score, status, progress) {
+    formatted.score = score;
+    formatted.status = status;
+    formatted.progress = progress;
+    return formatted;
+}
+
+function pruneDuplicates(newList, originalList, original ) {
+    var newToAdd = [];
+    //loop through all of the new relations
+    newList.forEach((relation) => {
+        //If we look through the original list of relations and don't find it, its new so add it the array. We also don't want to add the oringal itself
+        if (!originalList.find((existingRelations) => existingRelations.id === relation.id) && original.id != relation.id){
+            newToAdd.push(relation);
+        }
+    });
+    return newToAdd;
+}
+
+
+async function franchiseSearch(req, res, params) {
+    var queryString = `
+        query($id: String) {
+                MediaListCollection(userName: $id, type: ANIME) {
+                  lists {
+                    status
+                    entries {
+                      status
+                      progress
+                      score
+                      media {
+                        id
+                        title {
+                          romaji
+                          english
+                        }
+                        siteUrl
+                        startDate {
+                            year
+                            month
+                            day
+                        }
+                        episodes
+                        relations {
+                          edges {
+                            relationType
+                            node {
+                              id
+                              type
+                              startDate {
+                                year
+                                month
+                                day
+                              }
+                              siteUrl
+                              title {
+                                romaji
+                                english
+                              }
+                              episodes
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+    `,
+    variables = {
+        id: params.term
+    }, data = {};
+
+    options.body = JSON.stringify({
+        query: queryString,
+        variables: variables
+    });
+    data = await (fetch(location,options).then(handleResponse)).catch(handleError);
+
+    var finalObjects = [],
+        allEntries = [];
+
+    data.data.MediaListCollection.lists.forEach((list) => {
+        allEntries.push(...list.entries);
+    })
+
+    allEntries.forEach((entry) => {
+        var relations = entry.media.relations.edges,
+            finalObject = {original: addUserInfo(formatEntry(entry.media, mediaRelation.org), entry.score, entry.status, entry. progress), following: []};
+        relations.forEach((relation) => {
+            if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA") {
+                return;
+            }
+            finalObject.following.push(formatEntry(relation.node, relation.relationType));
+        })
+
+        //atempt to search through all existing entries, specifically their relations to see if we found one
+        var foundRelation = {};
+        var existingEntry = finalObjects.find((entrytwo) => {
+            return entrytwo.following.find((relation) => {
+                if(finalObject.original.id == relation.id) {
+                    foundRelation = relation;
+                    return true;
+                }
+                return  false
+            })
+        });
+
+        if (existingEntry) {
+            //If we did and its older than the original, it should be the start of the chain
+            if (existingEntry.original.startDate > finalObject.original.startDate && foundRelation.relationType != mediaRelation.char) {
+                //make the first original be a relation and then overwrite the original
+                var relationLink = finalObject.following.find((follow) => follow.id == existingEntry.original.id )
+                if (relationLink) {
+                    existingEntry.original.relationType = relationLink.relationType
+                }
+                existingEntry.following.push(existingEntry.original);
+                existingEntry.original = finalObject.original;
+            } else {
+                //If it's a newer work we still want to add it to the list of relations
+                var existingRelation = existingEntry.following.find((relation) => relation.id == finalObject.original.id)
+                //If it already was a relation we just want to add on new info like score and status
+                if (existingRelation) {
+                    addUserInfo(existingRelation);
+                }
+                //If not we just want to add it
+                else {
+                    existingEntry.following.push(finalObject.original);
+                }
+            }
+            //We want to add on relations of the new entry, but only the new ones
+            existingEntry.following.push(...pruneDuplicates(finalObject.following, existingEntry.following, existingEntry.original));
+        }
+        else {
+            //If its not found already we want to add it to thel ist
+            finalObjects.push(finalObject);
+        }        
+    });
+
+    var filteredDownFranchises = finalObjects.filter((obj) => {
+        //Keep the length reasonable (TODO make this modifiable by the user)
+        return obj.following.length > 5
+    }).filter((obj) => {
+        //We only want to show franchises where at least one of the shows has been watched
+        return obj.original.status == mediaStatus.com || obj.original.status == mediaStatus.repeat || obj.following.find((follow) => follow.status == mediaStatus.com || follow.status == mediaStatus.repeat)
+    }).map((obj) => {
+        //Organize by date
+        obj.following.sort((a, b) => 
+        {
+            if (a.startDate < b.startDate) {
+                return -1
+            }
+            else if (a.startDate > b.startDate) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        });
+        return obj;
+    });
+
+    filteredDownFranchises.forEach((franchise) => {
+        if(!franchise.original.status) {
+            var entry = allEntries.find((entry) => entry.media.id == franchise.original.id);
+            if (entry) {
+                addUserInfo(franchise.original, entry.score, entry.status, entry.progress);
+            }
+        } 
+        franchise.following.forEach((related) => {
+            if(!related.status) {
+                var relatedEntry = allEntries.find((entry) => entry.media.id == related.id);
+                if (relatedEntry) {
+                    addUserInfo(related, relatedEntry.score, relatedEntry.status, relatedEntry.progress);
+                }
+            }
+        })
+    })
+
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.write(JSON.stringify(filteredDownFranchises));
+    res.end();
+    
+    return res;
 }
 
 function userSearch(req, res, params) {
@@ -60,26 +298,26 @@ function userSearch(req, res, params) {
                 lists {
                     status
                     entries {
-                      score
-                      media {
-                        id
-                        title {
-                            english
-                            romaji
-                        }
-                        recommendations(sort: RATING_DESC) {
-                          edges {
-                            node {
-                              mediaRecommendation {
-                                id
-                              }
-                              rating
+                        score
+                        media {
+                            id
+                            title {
+                                english
+                                romaji
                             }
-                          }
+                            recommendations(sort: RATING_DESC) {
+                                edges {
+                                    node {
+                                        mediaRecommendation {
+                                            id
+                                        }
+                                        rating
+                                    }
+                                }
+                            }
                         }
-                      }
                     }
-                  }
+                }
             }
         }
     `
@@ -88,42 +326,15 @@ function userSearch(req, res, params) {
         id: params.term
     };
 
-    var url = `https://graphql.anilist.co`,
-        options ={
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
+    options.body = JSON.stringify({
                 query: queryString,
                 variables: variables
-            })
-        };
-    fetch(url, options).then(handleResponse)
+            });
+    fetch(location, options).then(handleResponse)
                        .then(handleData)
                        .catch(handleError)
     return res;
 
-    function handleError(error) {
-        console.log(error);
-        res.writeHead(500, {'Content-Type': 'application/json'});
-        var responseMessage = {
-            message: "Failed to connect to anilist. Check Username info and try again",
-            error: error
-        };
-
-        res.write(JSON.stringify(responseMessage));
-        res.end();
-    }
-
-    function handleResponse(response) {
-        console.log(response);
-        return response.json().then(function (json) {
-            return response.ok ? json : Promise.reject();
-        });
-    }
-    
     async function handleData(data) {
         //get the lists of the users anime which are split into categories
         var userLists = data.data.MediaListCollection.lists;
@@ -131,6 +342,7 @@ function userSearch(req, res, params) {
         var formatHalf = scoreFormat.find((format) => format.name === data.data.MediaListCollection.user.mediaListOptions.scoreFormat).half;
         //Start with statuses we want to include, we always want to include completed and rewatching
         var statusToAllow = [mediaStatus.com, mediaStatus.repeat];
+        var exponentMode = params.exponent;
         //based on certain params, add more lists
         if(params.watching) statusToAllow.push(mediaStatus.cur);
         if(params.dropped) statusToAllow.push(mediaStatus.drop);
@@ -154,59 +366,59 @@ function userSearch(req, res, params) {
          */
         var recs = [];
         //Iterate through the enteries
-        for(var i = 0; i < entries.length; i++) {
-            var score = entries[i].score;
+        entries.forEach((entry) => {
+            var score = entry.score;
             //if the score is zero assume it isn't rated, also if its a half score we ignore it
             if (score === 0 || score === formatHalf) {
-                continue;
+                return;
             }
             var totalUpvotes = 0;
             //Grab the array of recommendations
-            var recommendations = entries[i].media.recommendations.edges;
+            var recommendations = entry.media.recommendations.edges;
             //Iterate through the recommendations
-            for(var j = 0; j < recommendations.length; j++) {
+           recommendations.forEach((reccomendation) => {
                 //If the rec has a 0 or sub zero rating ignore it also sometimes it just has a recommendation of null?
-                if (recommendations[j].node.rating <= 0 || recommendations[j].node.mediaRecommendation === null) {
-                    continue;
+                if (reccomendation.node.rating <= 0 || reccomendation.node.mediaRecommendation === null) {
+                    return;
                 }
                 //Add up all the recs to get some math
-                totalUpvotes += recommendations[j].node.rating;
-            }   
+                totalUpvotes += reccomendation.node.rating;
+            });
             //If the total number of upvotes is less than or equal to the number of recs that we should probably just ignore them. Same if there are less than 10 total upvotes, it breaks the math
             if (totalUpvotes <= recommendations.length || totalUpvotes < 10) {
-                continue;
+                return;
             }
             //Now iterate through the recs for real
-            for (var j = 0; j < recommendations.length; j++) {
+            recommendations.forEach((reccomendation) => {
                 //ignore this if the rating is les than zero, or if the recommendation is null
-                if (recommendations[j].node.rating <= 0 ||  recommendations[j].node.mediaRecommendation === null) {
-                    continue;
+                if (reccomendation.node.rating <= 0 ||  reccomendation.node.mediaRecommendation === null) {
+                    return;
                 }
-                var existingRec = recs.find((e) => e.id === recommendations[j].node.mediaRecommendation.id);
+                var existingRec = recs.find((e) => e.id === reccomendation.node.mediaRecommendation.id);
                 if (existingRec != null) {
                     var sequelDeweight = 1;
                     existingRec.sources.map((source) => {
                         //If we find this show has the title of another show in it, its a direct sequel and we want to deweight it
-                        if (entries[i].media.title.romaji.indexOf(source.romajiName) >= 0) {
+                        if (entry.media.title.romaji.indexOf(source.romajiName) >= 0) {
                             source.sequels += 2;
                             //we deweight starting at 1 seuqel going up
                             sequelDeweight = source.sequels + 1;
                         }
                         return source;
                     })
-                    existingRec.rating += calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight, params.exponent);
-                    existingRec.sources.push({englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0})
+                    existingRec.rating += calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, sequelDeweight, exponentMode);
+                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0})
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 else {
                     recs.push({
-                        id: recommendations[j].node.mediaRecommendation.id,
-                        rating: calculateRating(score, recommendations[j].node.rating, totalUpvotes, formatHalf, sequelDeweight, params.exponent),
-                        sources: [{englishName: entries[i].media.title.english, romajiName: entries[i].media.title.romaji, upvotes: recommendations[j].node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0}]
+                        id: reccomendation.node.mediaRecommendation.id,
+                        rating: calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, 1, exponentMode),
+                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0}]
                     })
                 }
-            }
-         }
+            });
+         });
          //Take the results of the recs and remove any below 0 recs, then remove an entries which already are on completed, then sort by rating, then cut to just the top 200
         var results = recs.filter((rec) => rec.rating > 0)
         .filter((rec) => entries.find((entry) => entry.media.id === rec.id) == null)
@@ -269,7 +481,7 @@ function userSearch(req, res, params) {
         finalObject = [];
         //Loop while we still have pages of data to retrieve
         do {
-            data = await (fetch(url,options).then(handleResponse)).catch(handleError);
+            data = await (fetch(location,options).then(handleResponse)).catch(handleError);
             data.data.Page.media.forEach((show) => {
                 recData = results.find((result) => result.id === show.id);
                 //avoids over recomending shows with only 1 or 2 sources. if there are at least 3 sources multiplies by 1, otherwise multiply by 1/2 or 1/3

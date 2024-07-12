@@ -9,7 +9,7 @@ body {
     width: 10rem;
     height: 10rem;
 }
-#searchForm .btn-group {
+.search-form .btn-group {
     margin-left : 0;
     padding-left: 0;
 }
@@ -47,7 +47,7 @@ body {
     background: #2b2d42;
 }
 
-#searchForm {
+.search-form {
     margin: 10px;
     text-align: center;
 }
@@ -133,6 +133,35 @@ body {
     width: auto;
 }
 
+#franchise-app .list-group {
+    margin: 20px;
+    width: 30%;
+    display: inline-flex;
+}
+
+.list-group-item-action {
+    text-align: left;
+}
+
+.list-group-item-action *{
+    display: inline-flex;
+}
+
+.franchise-name {
+    margin-bottom: 0px;
+}
+.franchise-name span {
+    margin-left: 10px;
+    height: 100%;
+}
+.score-length {
+    float: right;
+}
+.score-length span {
+    height: 100%;
+    margin-right: 5px;
+}
+
 @media(max-width: 2365px) {
     #result {
         max-width: none;
@@ -167,7 +196,7 @@ body {
     #year-range {
         display: block;
     }
-    #searchForm div {
+    .search-form div {
         margin-top: 10px;
     }
 }
