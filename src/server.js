@@ -91,7 +91,7 @@ function formatEntry(preFormatted, relationType) {
     if(preFormatted.startDate.year == null) {
         preFormatted.startDate.year = 2050;
     }
-    formmated.startDate = new Date(preFormatted.startDate.year, preFormatted.startDate.month, preFormatted.startDate.day)
+    formmated.startDate = new Date(preFormatted.startDate.year, preFormatted.startDate.month, preFormatted.startDate.day);
     formmated.id = preFormatted.id;
     formmated.episodes = preFormatted.episodes;
     formmated.relationType = preFormatted.relationType;
@@ -197,7 +197,6 @@ async function franchiseSearch(req, res, params) {
         })
 
         //atempt to search through all existing entries, specifically their relations to see if we found one
-        var foundRelation = {};
         var existingEntry = finalObjects.find((entrytwo) => {
             return entrytwo.following.find((relation) => {
                 if(finalObject.original.id == relation.id) {
@@ -215,35 +214,19 @@ async function franchiseSearch(req, res, params) {
                     })
                 });
             })
-        }
+        }        
         if (existingEntry) {
             //Existing entry = original show + its relations
             //final object = current show + its interations
-            //If we did and its older than the original, it should be the start of the chain
-            if (existingEntry.original.startDate > finalObject.original.startDate && foundRelation.relationType != mediaRelation.char) {
-                //final current shows relation to original show
-                var relationLink = finalObject.following.find((follow) => follow.id == existingEntry.original.id )
-                if (relationLink) {
-                    existingEntry.original.relationType = relationLink.relationType
-                }
-                //Add original show as a relation to new show
-                existingEntry.following.push(existingEntry.original);
-                //remove new show from array of relations
-                existingEntry.following.splice(existingEntry.following.findIndex((originalLink) => {
-                    return originalLink.id == finalObject.original.id;
-                }), 1);
-                existingEntry.original = finalObject.original;
-            } else {
-                //If it's a newer work we still want to add it to the list of relations
-                var existingRelation = existingEntry.following.find((relation) => relation.id == finalObject.original.id)
-                //If it already was a relation we just want to add on new info like score and status
-                if (existingRelation) {
-                    addUserInfo(existingRelation, finalObject.original.score, finalObject.original.status, finalObject.original.progress);
-                }
-                //If not we just want to add it
-                else {
-                    existingEntry.following.push(finalObject.original);
-                }
+            //If it's a newer work we still want to add it to the list of relations
+            var existingRelation = existingEntry.following.find((relation) => relation.id == finalObject.original.id)
+            //If it already was a relation we just want to add on new info like score and status
+            if (existingRelation) {
+                addUserInfo(existingRelation, finalObject.original.score, finalObject.original.status, finalObject.original.progress);
+            }
+            //If not we just want to add it
+            else {
+                existingEntry.following.push(finalObject.original);
             }
             //We want to add on relations of the new entry, but only the new ones
             existingEntry.following.push(...pruneDuplicates(finalObject.following, existingEntry.following, existingEntry.original));
@@ -261,6 +244,9 @@ async function franchiseSearch(req, res, params) {
         //We only want to show franchises where at least one of the shows has been watched
         return obj.original.status == mediaStatus.com || obj.original.status == mediaStatus.repeat || obj.following.find((follow) => follow.status == mediaStatus.com || follow.status == mediaStatus.repeat)
     }).map((obj) => {
+        if(obj.id == 5270) {
+            console.log(obj);
+        }
         //Organize by date
         obj.following.sort((a, b) => 
         {
@@ -274,10 +260,38 @@ async function franchiseSearch(req, res, params) {
                 return 0;
             }
         });
+
+        obj.following.forEach((follow) => {
+            //If we did and its older than the original, it should be the start of the chain
+            if (obj.original.startDate > follow.startDate) {
+                
+                //Add original show as a relation to new show
+                obj.following.push(obj.original);
+                obj.original = follow;
+                //remove new show from array of relations
+                obj.following.splice(obj.following.findIndex((originalLink) => {
+                    return originalLink.id == follow.id;
+                }), 1);
+            } 
+        });
         return obj;
     });
 
     filteredDownFranchises.forEach((franchise) => {
+        var reducedArray = filteredDownFranchises.filter((otherFranchise, index) => { 
+            if (otherFranchise.original.id == franchise.original.id) {
+                otherFranchise.index = index;
+                return true;
+            }
+            return false;
+        });
+        console.log(reducedArray);
+        if(reducedArray.length > 1) {
+            for (var i = 1; i < reducedArray.length; i++) {
+                reducedArray[0].following.push(...pruneDuplicates(reducedArray[i].following, reducedArray[0].following, reducedArray[0].original));
+                filteredDownFranchises.splice(reducedArray[i].index, 1);
+            }
+        }
         if(!franchise.original.status) {
             var entry = allEntries.find((entry) => entry.media.id == franchise.original.id);
             if (entry) {

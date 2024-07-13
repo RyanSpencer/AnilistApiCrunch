@@ -70,8 +70,6 @@ var app,
                 data: dataObj,
                 dataType: "JSON",
                 success: function(result, status, xhr) {
-                    console.log(result);
-                    console.log(action);
                     if (action == app.recommedationsForm.action) {
                         result.map((rec) => {
                             rec.show = true;
