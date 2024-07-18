@@ -42,9 +42,16 @@ body {
 .card-hotlink {
     float: right;
 }
+.navbar-nav .active {
+    font-weight: 700;
+}
 
 .card-hotlink .site-icon {
     background: #2b2d42;
+}
+
+.alert {
+    margin: 25px;
 }
 
 .search-form {
@@ -95,6 +102,10 @@ body {
 .view-preferences div {
     background: white;
 }
+.view-preferences .pagination .disabled a {
+    color: rgba(0,0,0,0)
+}
+
 #apiCall {
     margin: auto;
 }

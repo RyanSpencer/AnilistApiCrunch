@@ -33,7 +33,8 @@ var app,
                 <div class="card-body">
                     <h4 class="card-title" v-if="(titleLanguage === 'english' && rec.title.english != null ) || rec.title.romaji == null">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
                     <h4 class="card-title" v-if="(titleLanguage === 'romaji' && rec.title.romaji != null ) || rec.title.english == null">{{rec.title.romaji}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
-                    <p>{{rec.episodes}} Episodes</p>
+                    <p v-show="rec.episodes != null && rec.format != 'MOVIE'">{{rec.episodes}} Episodes</p>
+                    <p v-show="rec.format == 'MOVIE'">Movie</p>
                 </div>
                 <div class="card-footer">
                     <div class="overflow-x-auto site-link-container" v-bind:class="{'empty-links': rec.externalLinks.length < 1}">
@@ -61,7 +62,7 @@ var app,
             formData.forEach((data) => {
                 dataObj[data.name] = data.value
             })
-            
+            app.errorText = null;
             app.loading = true;
             $.ajax({
                 cache: false,
@@ -93,8 +94,8 @@ var app,
                 },
                 error: function(error, status, xhr) {
                     app.loading = false;
-                    var resultText = JSON.stringify(error);
-                    $("#result").text(resultText);
+                    app.errorText = error;
+                    app.errorText.error = JSON.parse(error.responseText);
                 }
             });
     
@@ -173,6 +174,7 @@ $(document).ready(function(){
             loading: false,
             section: 'recomendations-app',
             sources: [],
+            errorText: null,
             recommedationsForm: {
                 id: 'rec-form',
                 action: '/userSearch',

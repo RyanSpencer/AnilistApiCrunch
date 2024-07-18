@@ -36,22 +36,10 @@ options ={
 };
 
 
-function handleError(error) {
-    console.log(error);
-    res.writeHead(500, {'Content-Type': 'application/json'});
-    var responseMessage = {
-        message: "Failed to connect to anilist. Check Username info and try again",
-        error: error
-    };
-
-    res.write(JSON.stringify(responseMessage));
-    res.end();
-}
-
 function handleResponse(response) {
     console.log(response);
     return response.json().then(function (json) {
-        return response.ok ? json : Promise.reject();
+        return response.ok ? json : Promise.reject({status: response.status, statusText: response.statusText});
     });
 }
 
@@ -121,6 +109,12 @@ function pruneDuplicates(newList, originalList, original ) {
 
 
 async function franchiseSearch(req, res, params) {
+    function handleError(error) {
+        res.writeHead(500, {'Content-Type': 'application/json'});
+        res.write(JSON.stringify(error));
+        res.end();
+    }
+
     var queryString = `
         query($id: String) {
                 MediaListCollection(userName: $id, type: ANIME, sort: MEDIA_ID) {
@@ -177,7 +171,7 @@ async function franchiseSearch(req, res, params) {
         query: queryString,
         variables: variables
     });
-    data = await (fetch(location,options).then(handleResponse)).catch(handleError);
+    data = await ((fetch(location,options).then(handleResponse)).catch(handleError));
 
     var finalObjects = [],
         allEntries = [];
@@ -244,9 +238,6 @@ async function franchiseSearch(req, res, params) {
         //We only want to show franchises where at least one of the shows has been watched
         return obj.original.status == mediaStatus.com || obj.original.status == mediaStatus.repeat || obj.following.find((follow) => follow.status == mediaStatus.com || follow.status == mediaStatus.repeat)
     }).map((obj) => {
-        if(obj.id == 5270) {
-            console.log(obj);
-        }
         //Organize by date
         obj.following.sort((a, b) => 
         {
@@ -316,6 +307,13 @@ async function franchiseSearch(req, res, params) {
 }
 
 function userSearch(req, res, params) {
+    function handleError(error) {
+        res.writeHead(500, {'Content-Type': 'application/json'});
+    
+        res.write(JSON.stringify(error));
+        res.end();
+    }
+
     var queryString = `
         query($id: String) {
             MediaListCollection(userName: $id, type: ANIME) {
