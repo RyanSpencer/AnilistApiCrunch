@@ -127,9 +127,13 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>                    
                             <div class="modal-body">
-                                {{rating}}
+                                Recommendation Score: {{rating}}
+                                </br>
+                                Each source show adds to the reccomendation score using a formula, multiplying by the percentage of votes this recommendation recieved out of the total votes all recommendations for the source got. 
+                                Shows that have a large total number of votes are weighted more heavily, while sequels are weighted less heavily. 
+                                If you selected Exponentional Caluclation, the score you gave was treated as an exponent instead, meaning that 10s were weighted exponetionally more than 9s, and so on.
                                 <div v-for="source in sources">
-                                    <p>{{((titleLanguage === 'english' && source.englishName != null) || source.romajiName == null)? source.englishName : source.romajiName}} had {{source.upvotes}} out of {{source.totalUpvotes}} with a score of {{source.score}}</p> </br> 
+                                    <p>{{((titleLanguage === 'english' && source.englishName != null) || source.romajiName == null)? source.englishName : source.romajiName}} had {{source.upvotes}} Votes out of {{source.totalUpvotes}} Total Votes with a user score of {{source.score}} for a final score of {{source.rating}}</p> </br> 
                                 </div>
                             </div>
                         </div>

@@ -433,15 +433,17 @@ function userSearch(req, res, params) {
                         }
                         return source;
                     })
-                    existingRec.rating += calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, sequelDeweight, exponentMode);
-                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0})
+                    var ratingCalc = calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, sequelDeweight, exponentMode);
+                    existingRec.rating += ratingCalc
+                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc})
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 else {
+                    var ratingCalc = calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, 1, exponentMode);
                     recs.push({
                         id: reccomendation.node.mediaRecommendation.id,
-                        rating: calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, 1, exponentMode),
-                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0}]
+                        rating: ratingCalc,
+                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc}]
                     })
                 }
             });
@@ -515,7 +517,17 @@ function userSearch(req, res, params) {
                 var adjustedRating = recData.rating *(1/(recData.sources.length < 3 ? recData.sources.length % 3 : 1));
                 //If the rating value was so small that it increased ignore that calc, otherwise just return the adjusted rating
                 show.rating = adjustedRating <= recData.rating ? adjustedRating : recData.rating;
-                show.sources = recData.sources;
+                show.sources = recData.sources.sort((a, b) => {
+                    if (a.rating > b.rating) {
+                        return -1;
+                    }
+                    else if (a.rating < b.rating) {
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
+                });
                 show.externalLinks = show.externalLinks.filter((link) => link.type === "STREAMING");
                 finalObject.push(show);
             })

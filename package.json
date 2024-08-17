@@ -7,7 +7,9 @@
     },
     "author": "Ryan Spencer",
     "license": "UNLICENSED",
-    "devDependencies": {},
     "keywords": [],
-    "description": ""
+    "description": "",
+    "dependencies": {
+        "anilistcrunching": "file:"
+    }
 }
