@@ -308,6 +308,7 @@ async function franchiseSearch(req, res, params) {
 
 function userSearch(req, res, params) {
     function handleError(error) {
+        console.log(error);
         res.writeHead(500, {'Content-Type': 'application/json'});
     
         res.write(JSON.stringify(error));
