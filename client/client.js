@@ -33,7 +33,7 @@ var app,
                 <div class="card-body">
                     <h4 class="card-title" v-if="(titleLanguage === 'english' && rec.title.english != null ) || rec.title.romaji == null">{{rec.title.english}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
                     <h4 class="card-title" v-if="(titleLanguage === 'romaji' && rec.title.romaji != null ) || rec.title.english == null">{{rec.title.romaji}} <span class="badge text-bg-info">{{rec.seasonYear}}</span></h4>
-                    <p v-show="rec.episodes != null && rec.format != 'MOVIE'">{{rec.episodes}} Episodes</p>
+                    <p v-show="rec.episodes != null && rec.format != 'MOVIE'">{{rec.episodes}} Episode{{rec.episodes > 1 ? 's' : ''}} </p>
                     <p v-show="rec.format == 'MOVIE'">Movie</p>
                 </div>
                 <div class="card-footer">
@@ -254,16 +254,18 @@ $(document).ready(function(){
                     siteCon.classList.add("non-scroll-container");
                 }
             })
-            for(i = 1; i <= 8; i++) {
-                var pageButton = document.getElementById(i + '-page-link'),
-                    bottomButton = document.getElementById(i + '-page-link-bottom');
-                if (i > pages) {
-                    pageButton.classList.add('disabled');
-                    bottomButton.classList.add('disabled');
-                }
-                else {
-                    pageButton.classList.remove('disabled');
-                    bottomButton.classList.remove('disabled');
+            if (app.fullRec > 0) {
+                for(i = 1; i <= 8; i++) {
+                    var pageButton = document.getElementById(i + '-page-link'),
+                        bottomButton = document.getElementById(i + '-page-link-bottom');
+                    if (i > pages) {
+                        pageButton.classList.add('disabled');
+                        bottomButton.classList.add('disabled');
+                    }
+                    else {
+                        pageButton.classList.remove('disabled');
+                        bottomButton.classList.remove('disabled');
+                    }
                 }
             }
         });

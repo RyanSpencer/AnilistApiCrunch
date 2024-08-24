@@ -110,6 +110,7 @@ function pruneDuplicates(newList, originalList, original ) {
 
 async function franchiseSearch(req, res, params) {
     function handleError(error) {
+        console.log(error);
         res.writeHead(500, {'Content-Type': 'application/json'});
         res.write(JSON.stringify(error));
         res.end();
@@ -276,7 +277,6 @@ async function franchiseSearch(req, res, params) {
             }
             return false;
         });
-        console.log(reducedArray);
         if(reducedArray.length > 1) {
             for (var i = 1; i < reducedArray.length; i++) {
                 reducedArray[0].following.push(...pruneDuplicates(reducedArray[i].following, reducedArray[0].following, reducedArray[0].original));
@@ -567,7 +567,7 @@ function calculateRating(score, upvotes, totalUpvotes, formatHalf, sequelDeweigh
     var relativeScore = score - formatHalf;
     var certantityAdjustment = totalUpvotes.toString().length - 1;
     if (doExponent) {
-        var modifier = relativeScore > 1 ? 1 : -1
+        var modifier = relativeScore > 0 ? 1 : -1
         return (modifier * (percentage**(Math.abs(relativeScore))) * certantityAdjustment) / sequelDeweight;
     }
     else {
