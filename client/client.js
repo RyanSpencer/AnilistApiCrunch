@@ -227,7 +227,7 @@ $(document).ready(function(){
         app.sources = rec.sources;
         app.rating = rec.rating.toLocaleString(undefined);
     });
-    $('input[type="range"], input[type="checkbox"]').on('change', function(){
+    $('#dataArea :input').on('change', function(){
         app.fullRec.map((rec)=> {
             var format = app.formats.find((format) => format.value === rec.format);
             rec.show = format.active && rec.seasonYear >= app.startYear && rec.seasonYear <= app.endYear;
@@ -254,18 +254,16 @@ $(document).ready(function(){
                     siteCon.classList.add("non-scroll-container");
                 }
             })
-            if (app.fullRec > 0) {
-                for(i = 1; i <= 8; i++) {
-                    var pageButton = document.getElementById(i + '-page-link'),
-                        bottomButton = document.getElementById(i + '-page-link-bottom');
-                    if (i > pages) {
-                        pageButton.classList.add('disabled');
-                        bottomButton.classList.add('disabled');
-                    }
-                    else {
-                        pageButton.classList.remove('disabled');
-                        bottomButton.classList.remove('disabled');
-                    }
+            for(i = 1; i <= 8; i++) {
+                var pageButton = document.getElementById(i + '-page-link'),
+                    bottomButton = document.getElementById(i + '-page-link-bottom');
+                if (i > pages) {
+                    pageButton.classList.add('disabled');
+                    bottomButton.classList.add('disabled');
+                }
+                else {
+                    pageButton.classList.remove('disabled');
+                    bottomButton.classList.remove('disabled');
                 }
             }
         });
