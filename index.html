@@ -134,7 +134,7 @@
                                 If you selected Exponentional Caluclation, the score you gave was treated as an exponent instead, meaning that 10s were weighted exponetionally more than 9s, and so on.
                                 </br>
                                 <div v-for="source in sources">
-                                    <p>{{((titleLanguage === 'english' && source.englishName != null) || source.romajiName == null)? source.englishName : source.romajiName}} had {{source.upvotes}} Votes out of {{source.totalUpvotes}} Total Votes with a user score of {{source.score}} for a final score of {{source.rating}}</p> </br> 
+                                    </br> <p>{{((titleLanguage === 'english' && source.englishName != null) || source.romajiName == null)? source.englishName : source.romajiName}} had {{source.upvotes}} Votes out of {{source.totalUpvotes}} Total Votes with a user score of {{source.score}} for a final score of {{source.rating}}</p> 
                                 </div>
                             </div>
                         </div>

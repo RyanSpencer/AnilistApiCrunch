@@ -17,8 +17,8 @@ const mediaStatus = {
     {name: "POINT_100", half: 50},
     {name: "POINT_10_DECIMAL", half: 5},
     {name: "POINT_10", half: 5},
-    {name: "POINT_5", half: 3 },
-    {name: "POINT_3", half: 2 }
+    {name: "POINT_5", half: 2.5 },
+    {name: "POINT_3", half: 1.5 }
 ], mediaRelation = {
     adapt: "ADAPTION",
     char: "CHARACTER",
@@ -436,7 +436,7 @@ function userSearch(req, res, params) {
                     })
                     var ratingCalc = calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, sequelDeweight, exponentMode);
                     existingRec.rating += ratingCalc
-                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc})
+                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc.toFixed(2)})
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 else {
@@ -444,7 +444,7 @@ function userSearch(req, res, params) {
                     recs.push({
                         id: reccomendation.node.mediaRecommendation.id,
                         rating: ratingCalc,
-                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc}]
+                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc.toFixed(2)}]
                     })
                 }
             });
