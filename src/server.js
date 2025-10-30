@@ -22,7 +22,8 @@ const mediaStatus = {
 ], mediaRelation = {
     adapt: "ADAPTION",
     char: "CHARACTER",
-    org: "ORIGINAL"
+    org: "ORIGINAL",
+    other: "OTHER"
 }
 
 var location = `https://graphql.anilist.co`,
@@ -185,7 +186,7 @@ async function franchiseSearch(req, res, params) {
         var relations = entry.media.relations.edges,
             finalObject = {original: addUserInfo(formatEntry(entry.media, mediaRelation.org), entry.score, entry.status, entry. progress), following: []};
         relations.forEach((relation) => {
-            if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA" || relation.relationType == mediaRelation.char) {
+            if (relation.relationType == mediaRelation.adapt || relation.node.type == "MANGA" || relation.relationType == mediaRelation.char || relation.relationType == mediaRelation.other) {
                 return;
             }
             finalObject.following.push(formatEntry(relation.node, relation.relationType));
@@ -436,7 +437,7 @@ function userSearch(req, res, params) {
                     })
                     var ratingCalc = calculateRating(score, reccomendation.node.rating, totalUpvotes, formatHalf, sequelDeweight, exponentMode);
                     existingRec.rating += ratingCalc
-                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc.toFixed(2)})
+                    existingRec.sources.push({englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating:  Math.round(ratingCalc * 1e2) / 1e2})
                 }
                 //If there is no recs or it hasn't been added yet, add it
                 else {
@@ -444,7 +445,7 @@ function userSearch(req, res, params) {
                     recs.push({
                         id: reccomendation.node.mediaRecommendation.id,
                         rating: ratingCalc,
-                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: ratingCalc.toFixed(2)}]
+                        sources: [{englishName: entry.media.title.english, romajiName: entry.media.title.romaji, upvotes: reccomendation.node.rating, totalUpvotes: totalUpvotes, score: score, sequels: 0, rating: Math.round(ratingCalc * 1e2) / 1e2}]
                     })
                 }
             });
@@ -515,7 +516,7 @@ function userSearch(req, res, params) {
             data.data.Page.media.forEach((show) => {
                 recData = results.find((result) => result.id === show.id);
                 //avoids over recomending shows with only 1 or 2 sources. if there are at least 3 sources multiplies by 1, otherwise multiply by 1/2 or 1/3
-                var adjustedRating = recData.rating *(1/(recData.sources.length < 3 ? recData.sources.length % 3 : 1));
+                var adjustedRating = recData.rating / (recData.sources.length < 3 ? 4 - recData.sources.length: 1);
                 //If the rating value was so small that it increased ignore that calc, otherwise just return the adjusted rating
                 show.rating = adjustedRating <= recData.rating ? adjustedRating : recData.rating;
                 show.sources = recData.sources.sort((a, b) => {
